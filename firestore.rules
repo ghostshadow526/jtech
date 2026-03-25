@@ -1,0 +1,108 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId}
+// Fields:
+//   - uid: string (required) - The user's unique ID.
+//   - email: string (required) - The user's email address.
+//   - balance: number (required) - The user's account balance.
+//   - createdAt: timestamp (required) - When the user was created.
+//   - role: string (optional) - The user's role (admin/user).
+//
+// Collection: orders
+// Document ID: {orderId}
+// Fields:
+//   - user_id: string (required) - The UID of the user who placed the order.
+//   - service_id: string (required) - The ID of the service ordered.
+//   - quantity: number (required) - The quantity ordered.
+//   - link: string (required) - The link for the service.
+//   - smm_order_id: string (required) - The provider's order ID.
+//   - status: string (required) - The order status.
+//   - cost: number (required) - The cost of the order.
+//   - createdAt: timestamp (required) - When the order was placed.
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "clhoetash@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email', 'balance', 'createdAt']) &&
+             hasOnlyAllowedFields(['uid', 'email', 'balance', 'createdAt', 'role', 'displayName', 'photoURL']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.balance is number &&
+             data.balance >= 0;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Allow users to initialize their own profile with 0 balance
+      allow create: if isOwner(userId) && 
+                      isValidUser(request.resource.data) && 
+                      request.resource.data.balance == 0 &&
+                      (!('role' in request.resource.data) || request.resource.data.role == 'user');
+      
+      // Allow users to update their profile but NOT their balance or role
+      allow update: if isAdmin() || 
+                      (isOwner(userId) && 
+                       isValidUser(request.resource.data) && 
+                       request.resource.data.balance == resource.data.balance &&
+                       request.resource.data.role == resource.data.role);
+    }
+
+    match /orders/{orderId} {
+      // Users can only read their own orders
+      allow read: if isAuthenticated() && (resource.data.user_id == request.auth.uid || isAdmin());
+      
+      // Orders are created and updated via the server (Firebase Admin)
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

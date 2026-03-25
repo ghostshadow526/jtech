@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and balance information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identifier for the user." },
+        "email": { "type": "string", "format": "email", "description": "The user's email address." },
+        "displayName": { "type": "string", "description": "The user's display name." },
+        "photoURL": { "type": "string", "format": "uri", "description": "The user's profile picture URL." },
+        "balance": { "type": "number", "description": "The user's current account balance." },
+        "role": { "type": "string", "enum": ["user", "admin"], "description": "The user's role in the system." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user account was created." }
+      },
+      "required": ["uid", "email", "balance", "role"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "An SMM service order.",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string", "description": "The UID of the user who placed the order." },
+        "service_id": { "type": "string", "description": "The ID of the SMM service ordered." },
+        "quantity": { "type": "number", "description": "The quantity of the service ordered." },
+        "link": { "type": "string", "format": "uri", "description": "The link for the service (e.g., social media profile)." },
+        "smm_order_id": { "type": "string", "description": "The order ID from the SMM provider." },
+        "status": { "type": "string", "enum": ["pending", "completed", "processing", "canceled"], "description": "The current status of the order." },
+        "cost": { "type": "number", "description": "The cost of the order in the system's currency." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the order was placed." }
+      },
+      "required": ["user_id", "service_id", "quantity", "link", "smm_order_id", "status", "cost", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Individual user documents."
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Individual order documents."
+    }
+  }
+}
