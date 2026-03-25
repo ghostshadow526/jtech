@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Bell, Cpu, Megaphone, Rocket, ArrowLeft, ArrowRight, CheckCircle2, Mail, Lock, User, ShieldCheck, LogOut, Wallet, ShoppingCart, History, Search, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { Bell, Cpu, Megaphone, Rocket, ArrowLeft, ArrowRight, CheckCircle2, Mail, Lock, User, ShieldCheck, LogOut, Wallet, ShoppingCart, History, Search, ChevronRight, Loader2, AlertCircle, Settings, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useInView } from 'motion/react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, googleProvider, signInWithPopup, onAuthStateChanged, User as FirebaseUser, handleFirestoreError, OperationType, signInWithEmailAndPassword, createUserWithEmailAndPassword } from './firebase';
@@ -11,8 +11,13 @@ import { doc, onSnapshot, setDoc, serverTimestamp, collection, query, where, ord
 import axios from 'axios';
 import { Testimonials } from './components/Testimonials';
 import LoginCardSection from './components/ui/login-signup';
+import { DashboardLayout } from './components/ui/dashboard-with-collapsible-sidebar';
+import { DashboardHome } from './components/DashboardHome';
+import { ServicesView } from './components/ServicesView';
+import { OrdersView } from './components/OrdersView';
+import { AddFundsView } from './components/AddFundsView';
 
-type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth';
+type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help';
 
 interface SMMService {
   service: string;
@@ -58,6 +63,7 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
 
   const { scrollY } = useScroll();
 
@@ -145,7 +151,11 @@ export default function App() {
     try {
       await signInWithEmailAndPassword(auth, e, p);
     } catch (error: any) {
-      setAuthError(error.message);
+      if (error.code === 'auth/operation-not-allowed') {
+        setAuthError("Email/Password sign-in is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.");
+      } else {
+        setAuthError(error.message);
+      }
     } finally {
       setAuthLoading(false);
     }
@@ -157,7 +167,11 @@ export default function App() {
     try {
       await createUserWithEmailAndPassword(auth, e, p);
     } catch (error: any) {
-      setAuthError(error.message);
+      if (error.code === 'auth/operation-not-allowed') {
+        setAuthError("Email/Password sign-in is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.");
+      } else {
+        setAuthError(error.message);
+      }
     } finally {
       setAuthLoading(false);
     }
@@ -741,153 +755,6 @@ export default function App() {
     </motion.div>
   );
 
-  const renderServices = () => {
-    if (servicesLoading) {
-      return (
-        <div className="w-full h-96 flex flex-col items-center justify-center gap-4">
-          <Loader2 className="w-10 h-10 text-brand-400 animate-spin" />
-          <p className="text-brand-400 font-mono text-[10px] uppercase tracking-[0.3em]">Initializing Catalog...</p>
-        </div>
-      );
-    }
-
-    if (servicesError) {
-      return (
-        <div className="w-full h-96 flex flex-col items-center justify-center gap-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-rose-50 flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-rose-500" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-brand-950">Catalog Connection Failed</h3>
-            <p className="text-brand-500 text-sm max-w-md mx-auto">{servicesError}</p>
-          </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-8 py-3 bg-brand-950 text-white rounded-xl font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-brand-800 transition-all"
-          >
-            Retry Connection
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <motion.div 
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="w-full space-y-10"
-      >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div>
-          <h2 className="text-4xl font-bold text-brand-950 mb-4">Deployment Catalog</h2>
-          <p className="text-brand-500 text-sm max-w-md">Select from our proprietary engagement infrastructures. All deployments are monitored for quality and delivery speed.</p>
-        </div>
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-300" />
-          <input 
-            type="text" 
-            placeholder="Search capabilities (e.g. Instagram, Followers)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-field pl-12 h-14"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-8">
-        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
-          {Object.keys(services).map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-8 py-4 rounded-2xl text-[10px] font-mono uppercase tracking-[0.2em] whitespace-nowrap transition-all border ${
-                selectedCategory === cat 
-                  ? 'bg-brand-950 text-white border-brand-950 shadow-xl shadow-brand-900/20' 
-                  : 'bg-white border-brand-200 text-brand-400 hover:border-brand-950 hover:text-brand-950'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {selectedCategory && services[selectedCategory]
-            ?.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map(service => (
-              <ServiceCard key={service.service} service={service} onOrder={placeOrder} balance={balance} />
-            ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-  const renderOrders = () => (
-    <motion.div 
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="w-full max-w-6xl space-y-8"
-    >
-      <div className="flex justify-between items-center">
-        <div>
-          <button onClick={() => setView('dashboard')} className="flex items-center gap-2 text-brand-400 hover:text-brand-950 transition-colors mb-4">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.3em]">Back to Dashboard</span>
-          </button>
-          <h2 className="text-4xl font-bold text-brand-950">Operation Logs</h2>
-        </div>
-      </div>
-
-      <div className="glass-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-brand-100 bg-brand-50/50">
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.3em] text-brand-400">ID</th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.3em] text-brand-400">Service</th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.3em] text-brand-400">Quantity</th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.3em] text-brand-400">Cost</th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.3em] text-brand-400">Status</th>
-                <th className="px-8 py-6 text-[10px] font-mono uppercase tracking-[0.3em] text-brand-400">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-brand-50">
-              {orders.map(order => (
-                <tr key={order.id} className="hover:bg-brand-50/30 transition-colors">
-                  <td className="px-8 py-6 font-mono text-xs text-brand-400">#{order.smm_order_id}</td>
-                  <td className="px-8 py-6 text-sm font-medium text-brand-950">Service {order.service_id}</td>
-                  <td className="px-8 py-6 text-sm text-brand-500">{order.quantity.toLocaleString()}</td>
-                  <td className="px-8 py-6 text-sm font-bold text-brand-950">₦{order.cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                  <td className="px-8 py-6">
-                    <span className={`badge ${
-                      order.status === 'completed' ? 'bg-emerald-50 text-emerald-600' :
-                      order.status === 'processing' ? 'bg-blue-50 text-blue-600' :
-                      order.status === 'canceled' ? 'bg-rose-50 text-rose-600' :
-                      'bg-brand-100 text-brand-500'
-                    }`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-8 py-6 text-xs text-brand-400">
-                    {order.createdAt?.toDate().toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-              {orders.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-8 py-20 text-center text-brand-400 font-medium italic text-lg">
-                    No operations recorded in the infrastructure logs.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </motion.div>
-  );
-
   if (loading) {
     return (
       <div className="min-h-screen bg-brand-50 flex items-center justify-center">
@@ -896,111 +763,68 @@ export default function App() {
     );
   }
 
+  if (view === 'dashboard' || ['services', 'orders', 'billing', 'settings', 'help'].includes(activeTab)) {
+    return (
+      <DashboardLayout 
+        user={user} 
+        balance={balance} 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        onLogout={handleLogout}
+      >
+        {activeTab === 'home' && (
+          <DashboardHome 
+            balance={balance} 
+            orders={orders} 
+            onNavigate={(tab) => setActiveTab(tab)} 
+          />
+        )}
+        {activeTab === 'services' && (
+          <ServicesView 
+            servicesLoading={servicesLoading}
+            servicesError={servicesError}
+            services={services}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            placeOrder={placeOrder}
+            balance={balance}
+          />
+        )}
+        {activeTab === 'orders' && (
+          <OrdersView 
+            orders={orders} 
+            onBack={() => setActiveTab('home')} 
+          />
+        )}
+        {activeTab === 'billing' && <AddFundsView />}
+        {['settings', 'help'].includes(activeTab) && (
+          <div className="flex flex-col items-center justify-center h-96 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
+              <Settings className="w-8 h-8 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">Coming Soon</h3>
+            <p className="text-gray-500 dark:text-gray-400 max-w-xs">This section is currently under development. Check back soon for updates.</p>
+          </div>
+        )}
+      </DashboardLayout>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${user ? 'bg-brand-50' : 'bg-white'} text-brand-950 font-sans selection:bg-brand-900/5 overflow-x-hidden`}>
-      {user && renderSidebar()}
       {(!user && view !== 'auth') && <HomeNavbar />}
-
-      {/* Mobile Nav (Dashboard Only) */}
-      {user && (
-        <nav className={`lg:hidden fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'h-16 bg-white/80 backdrop-blur-md border-b border-brand-200' : 'h-24'}`}>
-          <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
-            <div className="flex items-center gap-4 cursor-pointer" onClick={() => setView(user ? 'dashboard' : 'home')}>
-              <div className="w-8 h-8 md:w-10 md:h-10">
-                <Logo />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-6">
-              <button 
-                onClick={() => setView('profile')}
-                className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center overflow-hidden border border-brand-200"
-              >
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-5 h-5 text-brand-400" />
-                )}
-              </button>
-            </div>
-          </div>
-        </nav>
-      )}
-
-      {/* Desktop Top Bar (Dashboard Only) */}
-      {user && (
-        <div className="hidden lg:flex fixed top-0 left-72 right-0 h-20 bg-white/80 backdrop-blur-md border-b border-brand-100 z-40 px-10 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-[10px] font-mono uppercase tracking-[0.4em] text-brand-400">System Status:</span>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-600 font-bold">Operational</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-brand-50 border border-brand-100">
-              <Wallet className="w-3 h-3 text-brand-400" />
-              <span className="text-[10px] font-mono font-bold text-brand-950">₦{balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-            </div>
-            <button className="p-2 rounded-xl hover:bg-brand-50 transition-colors relative">
-              <Bell className="w-5 h-5 text-brand-400" />
-              <div className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white" />
-            </button>
-          </div>
-        </div>
-      )}
 
       {view === 'auth' ? (
         <AnimatePresence mode="wait">
           {renderAuth()}
         </AnimatePresence>
       ) : (
-        <main className={`relative z-10 flex flex-col items-center min-h-screen ${user ? 'lg:pl-72 pt-24 lg:pt-32' : 'pt-20'}`}>
+        <main className={`relative z-10 flex flex-col items-center min-h-screen ${user ? 'pt-0' : 'pt-20'}`}>
           <div className="w-full max-w-7xl px-6 lg:px-10">
             <AnimatePresence mode="wait">
               {view === 'home' && renderHome()}
-              {view === 'dashboard' && renderDashboard()}
-              {view === 'services' && renderServices()}
-              {view === 'orders' && renderOrders()}
-              {view === 'profile' && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="w-full max-w-2xl mx-auto space-y-8"
-                >
-                  <h2 className="text-4xl font-bold text-brand-950">Identity Profile</h2>
-                  <div className="glass-card p-10 space-y-8 text-center">
-                    <div className="w-32 h-32 rounded-full bg-brand-100 mx-auto flex items-center justify-center overflow-hidden border-4 border-white shadow-xl">
-                      {user?.photoURL ? (
-                        <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="w-12 h-12 text-brand-400" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-brand-950">{user?.displayName}</h3>
-                      <p className="text-brand-500">{user?.email}</p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-brand-50 p-6 rounded-2xl">
-                        <p className="text-[10px] font-mono uppercase tracking-widest text-brand-400 mb-2">Account Type</p>
-                        <p className="font-bold text-brand-950">Standard</p>
-                      </div>
-                      <div className="bg-brand-50 p-6 rounded-2xl">
-                        <p className="text-[10px] font-mono uppercase tracking-widest text-brand-400 mb-2">Member Since</p>
-                        <p className="font-bold text-brand-950">2026</p>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full py-4 rounded-xl border border-rose-200 text-rose-500 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-rose-50 transition-all"
-                    >
-                      Terminate Session
-                    </button>
-                  </div>
-                </motion.div>
-              )}
             </AnimatePresence>
           </div>
 
@@ -1021,145 +845,8 @@ export default function App() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Footer */}
-        <footer className="mt-auto pt-20 w-full flex flex-col md:flex-row justify-between items-center gap-8 text-brand-400 text-[9px] font-mono uppercase tracking-[0.3em]">
-          <p>© 2026 JT Technologies. Operational Excellence.</p>
-          <div className="flex gap-10">
-            <a href="#" className="hover:text-brand-950 transition-colors">Privacy Protocol</a>
-            <a href="#" className="hover:text-brand-950 transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-brand-950 transition-colors">Contact</a>
-          </div>
-        </footer>
       </main>
       )}
-    </div>
-  );
-}
-
-function ServiceCard({ service, onOrder, balance }: any) {
-  const [quantity, setQuantity] = useState(parseInt(service.min));
-  const [link, setLink] = useState('');
-  const [isOrdering, setIsOrdering] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-
-  const cost = (parseFloat(service.rate) / 1000) * quantity;
-  const canAfford = balance >= cost;
-
-  return (
-    <div className="glass-card p-8 space-y-6 group relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-brand-50 rounded-bl-[100px] -z-10 group-hover:bg-brand-100 transition-colors" />
-      
-      <div className="flex justify-between items-start">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-[9px] font-mono uppercase tracking-widest text-brand-400">Node ID: {service.service}</span>
-          </div>
-          <h4 className="text-xl font-bold text-brand-950 leading-tight pr-4">{service.name}</h4>
-        </div>
-        <div className="text-right">
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-brand-400">Rate/1k</p>
-          <p className="text-xl font-bold text-brand-950">₦{parseFloat(service.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-[9px] font-mono uppercase tracking-[0.2em] text-brand-400 ml-1">Quantity</label>
-            <div className="relative">
-              <input 
-                type="number" 
-                min={service.min}
-                max={service.max}
-                value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value))}
-                className="input-field h-12"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-mono text-brand-300 uppercase">Units</div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[9px] font-mono uppercase tracking-[0.2em] text-brand-400 ml-1">Est. Cost</label>
-            <div className={`w-full bg-brand-50 border border-brand-100 rounded-xl h-12 flex items-center px-4 text-sm font-bold ${canAfford ? 'text-brand-950' : 'text-rose-500'}`}>
-              ₦{cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label className="text-[9px] font-mono uppercase tracking-[0.2em] text-brand-400 ml-1">Target Infrastructure URL</label>
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-300" />
-            <input 
-              type="text" 
-              placeholder="Enter destination URL..."
-              value={link}
-              onChange={(e) => setLink(e.target.value)}
-              className="input-field pl-12 h-12"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="pt-4 flex flex-col gap-4">
-        <button 
-          disabled={!canAfford || !link || isOrdering}
-          onClick={async () => {
-            setIsOrdering(true);
-            await onOrder(service.service, quantity, link);
-            setIsOrdering(false);
-            setLink('');
-          }}
-          className={`btn-primary w-full h-14 flex items-center justify-center gap-3 shadow-xl shadow-brand-900/10 ${
-            !canAfford || !link ? 'opacity-50 grayscale cursor-not-allowed' : ''
-          }`}
-        >
-          {isOrdering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
-          <span className="text-[11px] font-mono uppercase tracking-[0.2em] font-bold">
-            {canAfford ? 'Deploy Infrastructure' : 'Insufficient Credits'}
-          </span>
-        </button>
-
-        <button 
-          onClick={() => setShowDetails(!showDetails)}
-          className="text-[9px] font-mono uppercase tracking-[0.2em] text-brand-400 hover:text-brand-950 transition-colors flex items-center justify-center gap-2"
-        >
-          {showDetails ? 'Hide Technical Specs' : 'View Technical Specs'}
-          <ChevronRight className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-90' : ''}`} />
-        </button>
-      </div>
-
-      <AnimatePresence>
-        {showDetails && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
-          >
-            <div className="pt-6 border-t border-brand-100 grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-brand-300">Minimum Load</p>
-                <p className="text-xs font-bold text-brand-950">{service.min}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-brand-300">Maximum Load</p>
-                <p className="text-xs font-bold text-brand-950">{service.max}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-brand-300">Refill Protocol</p>
-                <p className="text-xs font-bold text-brand-950">{service.refill ? 'Enabled' : 'Disabled'}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-brand-300">Cancellation</p>
-                <p className="text-xs font-bold text-brand-950">{service.cancel ? 'Available' : 'Restricted'}</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
