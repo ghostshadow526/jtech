@@ -6,3 +6,38 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Image files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.svg
+*.avif
+*.ico
+*.bmp
+*.tiff
+
+# Video files
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+*.flv
+*.wmv
+*.m4v
+*.mpg
+*.mpeg
+
+# Audio files
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+
+# Other media
+*.pdf
+*.zip

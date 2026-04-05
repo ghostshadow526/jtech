@@ -16,8 +16,21 @@ import { DashboardHome } from './components/DashboardHome';
 import { ServicesView } from './components/ServicesView';
 import { OrdersView } from './components/OrdersView';
 import { AddFundsView } from './components/AddFundsView';
+import { SocialMediaBoostingPage } from './components/SocialMediaBoostingPage';
+import { AISubscriptionsPage } from './components/AISubscriptionsPage';
+import { MarketingPromotionsPage } from './components/MarketingPromotionsPage';
+import { ProductsPage } from './components/ProductsPage';
+import { DownloadPage } from './components/DownloadPage';
+import { SolutionsPage } from './components/SolutionsPage';
+import { ResourcesPage } from './components/ResourcesPage';
+import { PricingPage } from './components/PricingPage';
+import { AIToolsMarketplace } from './components/AIToolsMarketplace';
+import { AdminLayout } from './components/admin/AdminLayout';
+import { RegistrationsSection } from './components/admin/RegistrationsSection';
+import { PaymentsSection } from './components/admin/PaymentsSection';
+import { AIToolsSection } from './components/admin/AIToolsSection';
 
-type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help';
+type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'download' | 'solutions' | 'resources' | 'pricing' | 'ai-tools' | 'admin';
 
 interface SMMService {
   service: string;
@@ -64,6 +77,7 @@ export default function App() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
+  const [adminTab, setAdminTab] = useState('registrations');
 
   const { scrollY } = useScroll();
 
@@ -223,7 +237,7 @@ export default function App() {
       <div className="w-8 h-8 relative">
         <div className="absolute inset-0 bg-slate-900/5 blur-2xl rounded-full group-hover:bg-slate-900/10 transition-all duration-500" />
         <img 
-          src="https://raw.githubusercontent.com/ghostshadow526/jtech/main/src/logo.png" 
+          src="https://raw.githubusercontent.com/ghostshadow526/jtech/main/logo.png%20(4).png" 
           alt="JT Technologies Logo" 
           className="w-full h-full object-contain relative z-10"
           referrerPolicy="no-referrer"
@@ -241,16 +255,22 @@ export default function App() {
         <div className="flex items-center gap-8">
           <Logo showText={true} />
           <div className="hidden lg:flex items-center gap-6">
-            {['Product', 'Download', 'Solutions', 'Resources', 'Pricing'].map((item) => (
-              <button key={item} className="text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors flex items-center gap-1">
-                {item}
+            {[
+              { name: 'Product', view: 'products' },
+              { name: 'Download', view: 'download' },
+              { name: 'Solutions', view: 'solutions' },
+              { name: 'Resources', view: 'resources' },
+              { name: 'Pricing', view: 'pricing' },
+            ].map((item) => (
+              <button key={item.name} onClick={() => setView(item.view as View)} className="text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors flex items-center gap-1">
+                {item.name}
                 <ChevronRight className="w-3 h-3 rotate-90" />
               </button>
             ))}
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <button className="hidden sm:block text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors">Request a demo</button>
+          <button onClick={() => setView('ai-tools')} className="hidden sm:block text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors">AI Tools</button>
           <div className="w-px h-4 bg-brand-200 hidden sm:block" />
           <button onClick={() => navigateToAuth('login')} className="text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors">Log in</button>
           <button onClick={() => navigateToAuth('signup')} className="bg-brand-950 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-800 transition-all">
@@ -525,7 +545,7 @@ export default function App() {
               By leveraging our proprietary network, we amplify your content's reach, ensuring it resonates with the right audience and gains the momentum needed to trend globally. Our systems are designed to mimic organic growth, protecting your account's integrity while delivering unprecedented visibility. Whether you're looking to establish a new brand or scale an existing authority, our boosting services provide the necessary digital leverage.
             </p>
             <div className="pt-4">
-              <button className="flex items-center gap-2 text-notion-blue font-bold hover:gap-4 transition-all">
+              <button onClick={() => setView('social-media-boosting')} className="flex items-center gap-2 text-notion-blue font-bold hover:gap-4 transition-all">
                 Learn about our network <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -567,7 +587,7 @@ export default function App() {
               From large language models for content generation to specialized image synthesis engines, our AI subscription tier puts cutting-edge technology at your fingertips. We handle the complex infrastructure and API management, providing you with a seamless, high-performance interface to the most powerful tools in the industry. Stay ahead of the curve with guaranteed access to the latest model releases and dedicated processing power.
             </p>
             <div className="pt-4">
-              <button className="flex items-center gap-2 text-notion-blue font-bold hover:gap-4 transition-all">
+              <button onClick={() => setView('ai-subscriptions')} className="flex items-center gap-2 text-notion-blue font-bold hover:gap-4 transition-all">
                 Explore available models <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -609,7 +629,7 @@ export default function App() {
               We utilize a global network of high-authority distribution points to ensure your message is seen by millions. Whether it's a product launch, a brand awareness campaign, or a strategic PR push, our team designs and executes promotions that deliver measurable results and a significant return on investment. Our data-driven approach ensures every campaign is optimized for maximum conversion and engagement.
             </p>
             <div className="pt-4">
-              <button className="flex items-center gap-2 text-notion-blue font-bold hover:gap-4 transition-all">
+              <button onClick={() => setView('marketing-promotions')} className="flex items-center gap-2 text-notion-blue font-bold hover:gap-4 transition-all">
                 View campaign results <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -812,6 +832,21 @@ export default function App() {
     );
   }
 
+  if (view === 'admin' && user) {
+    return (
+      <AdminLayout
+        user={user}
+        activeTab={adminTab}
+        setActiveTab={setAdminTab}
+        onLogout={handleLogout}
+      >
+        {adminTab === 'registrations' && <RegistrationsSection />}
+        {adminTab === 'payments' && <PaymentsSection />}
+        {adminTab === 'tools' && <AIToolsSection />}
+      </AdminLayout>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${user ? 'bg-brand-50' : 'bg-white'} text-brand-950 font-sans selection:bg-brand-900/5 overflow-x-hidden`}>
       {(!user && view !== 'auth') && <HomeNavbar />}
@@ -825,6 +860,15 @@ export default function App() {
           <div className="w-full max-w-7xl px-6 lg:px-10">
             <AnimatePresence mode="wait">
               {view === 'home' && renderHome()}
+              {view === 'social-media-boosting' && <SocialMediaBoostingPage onBack={() => setView('home')} />}
+              {view === 'ai-subscriptions' && <AISubscriptionsPage onBack={() => setView('home')} />}
+              {view === 'marketing-promotions' && <MarketingPromotionsPage onBack={() => setView('home')} />}
+              {view === 'products' && <ProductsPage onBack={() => setView('home')} />}
+              {view === 'download' && <DownloadPage onBack={() => setView('home')} />}
+              {view === 'solutions' && <SolutionsPage onBack={() => setView('home')} />}
+              {view === 'resources' && <ResourcesPage onBack={() => setView('home')} />}
+              {view === 'pricing' && <PricingPage onBack={() => setView('home')} />}
+              {view === 'ai-tools' && <AIToolsMarketplace onBack={() => setView('home')} />}
             </AnimatePresence>
           </div>
 
