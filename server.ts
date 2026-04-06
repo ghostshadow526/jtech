@@ -36,7 +36,12 @@ app.use(cors());
 app.use(express.json());
 
 const SMM_API_URL = "https://smexploits.com/api/v2";
-const SMM_API_KEY = process.env.SMM_API_KEY || "0d40b5c2dae730babbee213e663bded5";
+const SMM_API_KEY = process.env.SMM_API_KEY;
+
+if (!SMM_API_KEY) {
+  console.error("SMM_API_KEY is not set in the environment. Please configure it in your .env or hosting environment.");
+  process.exit(1);
+}
 
 // API Endpoints
 
