@@ -227,7 +227,7 @@ export function AIToolsSection() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Price ($)</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Price (₦)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -317,7 +317,7 @@ export function AIToolsSection() {
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-200">
                   <div>
-                    <p className="text-sm font-bold text-gray-900">${tool.price.toFixed(2)}</p>
+                    <p className="text-sm font-bold text-gray-900">₦{tool.price.toFixed(2)}</p>
                     <p className={`text-xs font-semibold ${tool.published ? 'text-green-600' : 'text-yellow-600'}`}>
                       {tool.published ? 'Published' : 'Draft'}
                     </p>

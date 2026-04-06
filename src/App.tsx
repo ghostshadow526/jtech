@@ -76,7 +76,9 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('home');
+  // Dashboard sidebar uses title strings like "Dashboard", "Services", etc.
+  // Keep activeTab in sync with those values.
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [adminTab, setAdminTab] = useState('registrations');
 
   const { scrollY } = useScroll();
@@ -140,10 +142,15 @@ export default function App() {
       setServicesLoading(true);
       setServicesError(null);
       try {
-        const response = await axios.get('/api/services', { timeout: 15000 });
+        const response = await axios.get('/api/services', { timeout: 60000 });
+        console.log("Services fetched successfully:", response.data);
         setServices(response.data);
         const categories = Object.keys(response.data);
-        if (categories.length > 0) setSelectedCategory(categories[0]);
+        console.log("Categories found:", categories);
+        if (categories.length > 0) {
+          setSelectedCategory(categories[0]);
+          console.log("Selected first category:", categories[0]);
+        }
       } catch (error: any) {
         console.error("Error fetching services", error);
         setServicesError(error.message || "Failed to fetch services. Please check your connection.");
@@ -219,9 +226,12 @@ export default function App() {
         quantity,
         link
       });
-      setOrderSuccess(`Order placed! ID: ${response.data.order_id}`);
+      setOrderSuccess(`Order placed successfully! Order ID: ${response.data.order_id} • Cost: ₦${response.data.cost.toFixed(2)}`);
+      setTimeout(() => setOrderSuccess(null), 5000);
     } catch (error: any) {
-      setOrderError(error.response?.data?.error || "Failed to place order");
+      const errorMsg = error.response?.data?.error || error.message || "Failed to place order";
+      setOrderError(errorMsg);
+      setTimeout(() => setOrderError(null), 5000);
     } finally {
       setOrderLoading(false);
     }
@@ -783,7 +793,8 @@ export default function App() {
     );
   }
 
-  if (view === 'dashboard' || ['services', 'orders', 'billing', 'settings', 'help'].includes(activeTab)) {
+  // Authenticated user dashboard (including Services/Orders/Add Funds views)
+  if (view === 'dashboard') {
     return (
       <DashboardLayout 
         user={user} 
@@ -792,14 +803,14 @@ export default function App() {
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
       >
-        {activeTab === 'home' && (
+        {activeTab === 'Dashboard' && (
           <DashboardHome 
             balance={balance} 
             orders={orders} 
             onNavigate={(tab) => setActiveTab(tab)} 
           />
         )}
-        {activeTab === 'services' && (
+        {activeTab === 'Services' && (
           <ServicesView 
             servicesLoading={servicesLoading}
             servicesError={servicesError}
@@ -812,13 +823,13 @@ export default function App() {
             balance={balance}
           />
         )}
-        {activeTab === 'orders' && (
+        {activeTab === 'Orders' && (
           <OrdersView 
             orders={orders} 
             onBack={() => setActiveTab('home')} 
           />
         )}
-        {activeTab === 'billing' && <AddFundsView />}
+        {activeTab === 'Add Funds' && <AddFundsView />}
         {['settings', 'help'].includes(activeTab) && (
           <div className="flex flex-col items-center justify-center h-96 text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">

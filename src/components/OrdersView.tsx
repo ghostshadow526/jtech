@@ -42,7 +42,7 @@ export const OrdersView = ({ orders, onBack }: OrdersViewProps) => (
                 <td className="px-8 py-6 font-mono text-xs text-gray-500 dark:text-gray-400">#{order.smm_order_id}</td>
                 <td className="px-8 py-6 text-sm font-medium text-gray-900 dark:text-gray-100">Service {order.service_id}</td>
                 <td className="px-8 py-6 text-sm text-gray-500 dark:text-gray-400">{order.quantity.toLocaleString()}</td>
-                <td className="px-8 py-6 text-sm font-bold text-gray-900 dark:text-gray-100">${order.cost.toFixed(2)}</td>
+                <td className="px-8 py-6 text-sm font-bold text-gray-900 dark:text-gray-100">₦{order.cost.toFixed(2)}</td>
                 <td className="px-8 py-6">
                   <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                     order.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' :

@@ -81,7 +81,7 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
     <nav
       className={`sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out ${
         open ? 'w-64' : 'w-16'
-      } border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2 shadow-sm flex flex-col`}
+      } border-gray-900 dark:border-gray-900 bg-black dark:bg-black p-2 shadow-sm flex flex-col`}
     >
       <TitleSection open={open} user={user} />
 
@@ -139,8 +139,8 @@ const Option = ({ Icon, title, selected, setSelected, open, notifs }: any) => {
       onClick={() => setSelected(title)}
       className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${
         isSelected 
-          ? "bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 shadow-sm border-l-2 border-blue-500" 
-          : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+          ? "bg-gray-800 text-white shadow-sm border-l-2 border-white" 
+          : "text-gray-300 hover:bg-gray-900 hover:text-white"
       }`}
     >
       <div className="grid h-full w-12 place-content-center">
@@ -168,18 +168,18 @@ const Option = ({ Icon, title, selected, setSelected, open, notifs }: any) => {
 
 const TitleSection = ({ open, user }: any) => {
   return (
-    <div className="mb-6 border-b border-gray-200 dark:border-gray-800 pb-4">
-      <div className="flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+    <div className="mb-6 border-b border-gray-800 pb-4">
+      <div className="flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors hover:bg-gray-900">
         <div className="flex items-center gap-3">
           <Logo />
           {open && (
             <div className={`transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0'}`}>
               <div className="flex items-center gap-2">
                 <div>
-                  <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100 truncate max-w-[120px]">
+                  <span className="block text-sm font-semibold text-gray-100 truncate max-w-[120px]">
                     {user?.email?.split('@')[0] || 'User'}
                   </span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400">
+                  <span className="block text-xs text-gray-400">
                     Pro Plan
                   </span>
                 </div>
@@ -197,7 +197,7 @@ const TitleSection = ({ open, user }: any) => {
 
 const Logo = () => {
   return (
-    <div className="grid size-10 shrink-0 place-content-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+    <div className="grid size-10 shrink-0 place-content-center rounded-lg bg-gray-900 text-white shadow-sm">
       <svg
         width="20"
         height="auto"
@@ -221,7 +221,7 @@ const ToggleClose = ({ open, setOpen }: any) => {
   return (
     <button
       onClick={() => setOpen(!open)}
-      className="absolute bottom-0 left-0 right-0 border-t border-gray-200 dark:border-gray-800 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+      className="absolute bottom-0 left-0 right-0 border-t border-gray-800 transition-colors hover:bg-gray-900"
     >
       <div className="flex items-center p-3">
         <div className="grid size-10 place-content-center">
@@ -255,7 +255,7 @@ const Header = ({ isDark, setIsDark, user, balance }: any) => {
       <div className="flex items-center gap-4">
         <div className="hidden md:flex flex-col items-end mr-4">
           <span className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Balance</span>
-          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">${balance.toFixed(2)}</span>
+          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">₦{balance.toFixed(2)}</span>
         </div>
         <button className="relative p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
           <Bell className="h-5 w-5" />

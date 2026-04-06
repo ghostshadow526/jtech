@@ -35,14 +35,14 @@ export function PricingPage({ onBack }: PricingPageProps) {
           {[
             {
               name: 'Starter',
-              price: '$29',
+              price: '₦29,000',
               desc: 'Perfect for individuals',
               features: ['Basic features', '100 engagements/month', 'Email support', 'API access'],
               cta: 'Get Started',
             },
             {
               name: 'Professional',
-              price: '$99',
+              price: '₦99,000',
               desc: 'For growing businesses',
               features: ['All Starter features', '1K engagements/month', 'Priority support', 'Advanced analytics'],
               cta: 'Start Free Trial',

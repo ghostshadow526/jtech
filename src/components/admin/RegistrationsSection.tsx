@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Mail, User, Calendar, CheckCircle2 } from 'lucide-react';
+import { Mail, User, Calendar, CheckCircle2, Shield, ShieldOff } from 'lucide-react';
 
 interface Registration {
   id: string;
@@ -10,6 +10,7 @@ interface Registration {
   uid: string;
   createdAt: any;
   displayName?: string;
+  isAdmin?: boolean;
 }
 
 interface RegistrationStats {
@@ -29,6 +30,21 @@ export function RegistrationsSection() {
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [assigningAdmin, setAssigningAdmin] = useState<string | null>(null);
+
+  const handleAssignAdmin = async (userId: string, currentStatus: boolean) => {
+    setAssigningAdmin(userId);
+    try {
+      await updateDoc(doc(db, 'users', userId), {
+        isAdmin: !currentStatus,
+      });
+    } catch (error) {
+      console.error('Error assigning admin status:', error);
+      alert('Failed to update admin status');
+    } finally {
+      setAssigningAdmin(null);
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -158,6 +174,7 @@ export function RegistrationsSection() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">User ID</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Joined</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,6 +201,29 @@ export function RegistrationsSection() {
                     <td className="px-6 py-4 text-sm text-gray-600 font-mono">{reg.uid.substring(0, 12)}...</td>
                     <td className="px-6 py-4 text-sm text-gray-600">
                       {reg.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleAssignAdmin(reg.id, reg.isAdmin || false)}
+                        disabled={assigningAdmin === reg.id}
+                        className={`flex items-center gap-2 px-3 py-1 rounded-lg font-semibold transition-all text-sm ${
+                          reg.isAdmin
+                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                            : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                      >
+                        {reg.isAdmin ? (
+                          <>
+                            <ShieldOff className="w-4 h-4" />
+                            Remove Admin
+                          </>
+                        ) : (
+                          <>
+                            <Shield className="w-4 h-4" />
+                            Make Admin
+                          </>
+                        )}
+                      </button>
                     </td>
                   </motion.tr>
                 ))}

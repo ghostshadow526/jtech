@@ -175,7 +175,7 @@ export function AIToolsMarketplace({ onBack }: AIToolsMarketplaceProps) {
                     <div className="flex items-center justify-between pt-4 border-t border-brand-100">
                       <div>
                         <div className="text-2xl font-bold text-brand-950">
-                          ${tool.price.toFixed(2)}
+                          ₦{tool.price.toFixed(2)}
                         </div>
                         <div className="text-xs text-brand-600">one-time</div>
                       </div>

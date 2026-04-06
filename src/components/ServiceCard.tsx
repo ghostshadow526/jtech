@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Loader2, Rocket, ChevronRight } from 'lucide-react';
+import { Search, Loader2, ChevronRight, ShoppingCart } from 'lucide-react';
 
 export function ServiceCard({ service, onOrder, balance }: any) {
   const [quantity, setQuantity] = useState(parseInt(service.min));
@@ -12,27 +12,25 @@ export function ServiceCard({ service, onOrder, balance }: any) {
   const canAfford = balance >= cost;
 
   return (
-    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-8 space-y-6 group relative overflow-hidden shadow-sm hover:shadow-md transition-all">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 dark:bg-blue-900/10 rounded-bl-[100px] -z-10 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/20 transition-colors" />
-      
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 space-y-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-[9px] font-mono uppercase tracking-widest text-gray-400">Node ID: {service.service}</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-medium text-gray-500">Service ID: {service.service}</span>
           </div>
-          <h4 className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight pr-4">{service.name}</h4>
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-snug pr-4">{service.name}</h4>
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-gray-400">Rate/1k</p>
-          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">${parseFloat(service.rate).toFixed(2)}</p>
+          <p className="text-[11px] text-gray-500">Rate / 1,000</p>
+          <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">₦{parseFloat(service.rate).toFixed(2)}</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div className="grid grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-[9px] font-mono uppercase tracking-[0.2em] text-gray-400 ml-1">Quantity</label>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 ml-1">Quantity</label>
             <div className="relative">
               <input 
                 type="number" 
@@ -40,29 +38,29 @@ export function ServiceCard({ service, onOrder, balance }: any) {
                 max={service.max}
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value))}
-                className="w-full h-12 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full h-11 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-mono text-gray-400 uppercase">Units</div>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400">Units</div>
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[9px] font-mono uppercase tracking-[0.2em] text-gray-400 ml-1">Est. Cost</label>
-            <div className={`w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl h-12 flex items-center px-4 text-sm font-bold ${canAfford ? 'text-gray-900 dark:text-gray-100' : 'text-red-500'}`}>
-              ${cost.toFixed(2)}
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-300 ml-1">Estimated cost</label>
+            <div className={`w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg h-11 flex items-center px-3 text-sm font-semibold ${canAfford ? 'text-gray-900 dark:text-gray-100' : 'text-red-500'}`}>
+              ₦{cost.toFixed(2)}
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-[9px] font-mono uppercase tracking-[0.2em] text-gray-400 ml-1">Target Infrastructure URL</label>
+          <label className="text-xs font-medium text-gray-600 dark:text-gray-300 ml-1">Link to post / profile</label>
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input 
               type="text" 
               placeholder="Enter destination URL..."
               value={link}
               onChange={(e) => setLink(e.target.value)}
-              className="w-full h-12 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="w-full h-11 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
             />
           </div>
         </div>
@@ -77,23 +75,23 @@ export function ServiceCard({ service, onOrder, balance }: any) {
             setIsOrdering(false);
             setLink('');
           }}
-          className={`w-full h-14 flex items-center justify-center gap-3 rounded-xl font-bold text-white transition-all shadow-lg ${
+          className={`w-full h-11 flex items-center justify-center gap-2 rounded-lg font-medium text-white text-sm transition-all shadow ${
             !canAfford || !link 
               ? 'bg-gray-300 dark:bg-gray-700 cursor-not-allowed' 
-              : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/20'
+              : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/30'
           }`}
         >
-          {isOrdering ? <Loader2 className="w-4 h-4 animate-spin" /> : <Rocket className="w-4 h-4" />}
-          <span className="text-[11px] font-mono uppercase tracking-[0.2em]">
-            {canAfford ? 'Deploy Infrastructure' : 'Insufficient Credits'}
+          {isOrdering ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
+          <span>
+            {canAfford ? 'Place order' : 'Insufficient balance'}
           </span>
         </button>
 
         <button 
           onClick={() => setShowDetails(!showDetails)}
-          className="text-[9px] font-mono uppercase tracking-[0.2em] text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex items-center justify-center gap-2"
+          className="text-xs text-gray-500 hover:text-gray-900 dark:hover:text-gray-100 transition-colors flex items-center justify-center gap-1"
         >
-          {showDetails ? 'Hide Technical Specs' : 'View Technical Specs'}
+          {showDetails ? 'Hide details' : 'View details'}
           <ChevronRight className={`w-3 h-3 transition-transform ${showDetails ? 'rotate-90' : ''}`} />
         </button>
       </div>
@@ -106,22 +104,22 @@ export function ServiceCard({ service, onOrder, balance }: any) {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="pt-6 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-4">
+            <div className="pt-5 border-t border-gray-100 dark:border-gray-800 grid grid-cols-2 gap-4 text-xs">
               <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-gray-400">Minimum Load</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{service.min}</p>
+                <p className="text-[11px] text-gray-500">Minimum quantity</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{service.min}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-gray-400">Maximum Load</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{service.max}</p>
+                <p className="text-[11px] text-gray-500">Maximum quantity</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{service.max}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-gray-400">Refill Protocol</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{service.refill ? 'Enabled' : 'Disabled'}</p>
+                <p className="text-[11px] text-gray-500">Refill</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{service.refill ? 'Available' : 'Not available'}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-[8px] font-mono uppercase text-gray-400">Cancellation</p>
-                <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{service.cancel ? 'Available' : 'Restricted'}</p>
+                <p className="text-[11px] text-gray-500">Cancelable</p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{service.cancel ? 'Yes' : 'No'}</p>
               </div>
             </div>
           </motion.div>

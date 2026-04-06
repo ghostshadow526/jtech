@@ -23,7 +23,7 @@ export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProp
             <TrendingUp className="h-4 w-4 text-green-500" />
           </div>
           <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-1">Total Balance</h3>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">${balance.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">₦{balance.toFixed(2)}</p>
           <p className="text-sm text-green-600 dark:text-green-400 mt-1">Available for orders</p>
         </div>
         

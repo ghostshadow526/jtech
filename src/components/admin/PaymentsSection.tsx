@@ -111,8 +111,8 @@ export function PaymentsSection() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-green-700 text-sm font-medium">Total Revenue</p>
-              <p className="text-4xl font-bold text-green-900 mt-2">${stats.totalRevenue.toFixed(2)}</p>
-              <p className="text-xs text-green-700 mt-2">This Month: ${stats.thisMonthRevenue.toFixed(2)}</p>
+              <p className="text-4xl font-bold text-green-900 mt-2">₦{stats.totalRevenue.toFixed(2)}</p>
+              <p className="text-xs text-green-700 mt-2">This Month: ₦{stats.thisMonthRevenue.toFixed(2)}</p>
             </div>
             <DollarSign className="w-10 h-10 text-green-400" />
           </div>
@@ -128,7 +128,7 @@ export function PaymentsSection() {
             <div>
               <p className="text-blue-700 text-sm font-medium">Completed Payments</p>
               <p className="text-4xl font-bold text-blue-900 mt-2">{stats.completedPayments}</p>
-              <p className="text-xs text-blue-700 mt-2">Avg: ${stats.averageTransaction.toFixed(2)}</p>
+              <p className="text-xs text-blue-700 mt-2">Avg: ₦{stats.averageTransaction.toFixed(2)}</p>
             </div>
             <CreditCard className="w-10 h-10 text-blue-400" />
           </div>
@@ -171,7 +171,7 @@ export function PaymentsSection() {
           className="bg-white border border-gray-200 rounded-lg p-4"
         >
           <p className="text-gray-600 text-sm font-medium">Avg Transaction Value</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">${stats.averageTransaction.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">₦{stats.averageTransaction.toFixed(2)}</p>
         </motion.div>
       </div>
 

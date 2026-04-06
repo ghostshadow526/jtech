@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import axios from "axios";
+import https from "https";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import path from "path";
@@ -8,6 +9,10 @@ import { fileURLToPath } from "url";
 import admin from "firebase-admin";
 
 dotenv.config();
+
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +36,7 @@ app.use(cors());
 app.use(express.json());
 
 const SMM_API_URL = "https://smexploits.com/api/v2";
-const SMM_API_KEY = process.env.SMM_API_KEY || "2e08e047cc11516f01af3ce8ab41bad3";
+const SMM_API_KEY = process.env.SMM_API_KEY || "0d40b5c2dae730babbee213e663bded5";
 
 // API Endpoints
 
@@ -44,7 +49,8 @@ app.get("/api/services", async (req, res) => {
 
     const response = await axios.post(SMM_API_URL, params.toString(), {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      timeout: 10000
+      timeout: 60000,
+      httpsAgent
     });
     
     // Group by category
@@ -107,7 +113,8 @@ app.post("/api/order", async (req, res) => {
     params.append('action', 'services');
 
     const servicesRes = await axios.post(SMM_API_URL, params.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      httpsAgent
     });
     const service = servicesRes.data.find((s: any) => s.service === service_id);
     if (!service) {
@@ -128,7 +135,8 @@ app.post("/api/order", async (req, res) => {
     balanceParams.append('action', 'balance');
 
     const balanceRes = await axios.post(SMM_API_URL, balanceParams.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      httpsAgent
     });
     const smmBalance = parseFloat(balanceRes.data.balance);
     if (smmBalance < cost) {
@@ -144,7 +152,8 @@ app.post("/api/order", async (req, res) => {
     orderParams.append('quantity', quantity);
 
     const orderRes = await axios.post(SMM_API_URL, orderParams.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      httpsAgent
     });
 
     if (orderRes.data.error) {
@@ -189,7 +198,8 @@ app.get("/api/order/status/:order_id", async (req, res) => {
     params.append('order', order_id);
 
     const response = await axios.post(SMM_API_URL, params.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      httpsAgent
     });
     res.json(response.data);
   } catch (error: any) {
