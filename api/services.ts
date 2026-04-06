@@ -32,6 +32,10 @@ export default async function handler(req: any, res: any) {
     const services = response.data;
     if (!Array.isArray(services)) {
       console.error("Invalid response from SMM API. Response type:", typeof services, "Data:", services);
+      // If panel returned a JSON error, surface it to the client for easier debugging
+      if (services && typeof services === "object" && (services as any).error) {
+        return res.status(500).json({ error: (services as any).error });
+      }
       return res
         .status(500)
         .json({ error: "The service catalog is currently unavailable. Please try again later." });
@@ -46,7 +50,9 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json(grouped);
   } catch (error: any) {
-    console.error("Error fetching services:", error.message || error);
-    return res.status(500).json({ error: "Failed to fetch services" });
+    console.error("Error fetching services:", error?.response?.data || error.message || error);
+    // If upstream API included an error message, return it
+    const upstreamError = error?.response?.data?.error;
+    return res.status(500).json({ error: upstreamError || (error.message || "Failed to fetch services") });
   }
 }
