@@ -1,5 +1,6 @@
 import React from 'react';
 import { DollarSign, TrendingUp, Users, ShoppingCart, Package, Activity, Bell } from 'lucide-react';
+import { FeaturedServicesSection } from './FeaturedServicesSection';
 
 interface DashboardHomeProps {
   balance: number;
@@ -65,6 +66,15 @@ export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProp
           <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">Orders in progress</p>
         </div>
       </div>
+      
+      {/* Featured Services Section */}
+      <FeaturedServicesSection
+        onViewAllServices={() => onNavigate('services')}
+        onAddToCart={(service) => {
+          console.log('Added to cart:', service);
+          // You can implement add to cart functionality here
+        }}
+      />
       
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
