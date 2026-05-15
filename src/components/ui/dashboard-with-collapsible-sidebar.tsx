@@ -20,6 +20,7 @@ import {
   HelpCircle,
   User,
   LogOut,
+  Cpu,
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -89,6 +90,13 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
         <Option
           Icon={Home}
           title="Dashboard"
+          selected={activeTab}
+          setSelected={setActiveTab}
+          open={open}
+        />
+        <Option
+          Icon={Cpu}
+          title="AI Services"
           selected={activeTab}
           setSelected={setActiveTab}
           open={open}

@@ -25,12 +25,13 @@ import { SolutionsPage } from './components/SolutionsPage';
 import { ResourcesPage } from './components/ResourcesPage';
 import { PricingPage } from './components/PricingPage';
 import { AIToolsMarketplace } from './components/AIToolsMarketplace';
+import { AIServicesPage } from './components/AIServicesPage';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { RegistrationsSection } from './components/admin/RegistrationsSection';
 import { PaymentsSection } from './components/admin/PaymentsSection';
 import { AIToolsSection } from './components/admin/AIToolsSection';
 
-type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'download' | 'solutions' | 'resources' | 'pricing' | 'ai-tools' | 'admin';
+type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'download' | 'solutions' | 'resources' | 'pricing' | 'ai-tools' | 'ai-services' | 'admin';
 
 interface SMMService {
   service: string;
@@ -291,30 +292,6 @@ export default function App() {
     </nav>
   );
 
-  const SubNavbar = () => (
-    <div className="w-full border-b border-brand-100 bg-white sticky top-0 z-50 py-4">
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Rocket className="w-4 h-4 text-notion-blue" />
-          </div>
-          <span className="text-lg font-bold text-brand-950">Projects</span>
-        </div>
-        <div className="flex items-center gap-8">
-          <div className="hidden lg:flex items-center gap-6">
-            {['Features', 'Integrations', 'Templates', 'Downloads'].map((item) => (
-              <button key={item} className="text-sm font-medium text-brand-500 hover:text-brand-950 transition-colors">
-                {item}
-              </button>
-            ))}
-          </div>
-          <button onClick={() => navigateToAuth('signup')} className="bg-notion-blue text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-notion-blue-hover transition-all shadow-sm">
-            Get JT Tech free
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   const renderSidebar = () => (
     <div className="hidden lg:flex flex-col w-72 bg-white border-r border-brand-200 h-screen fixed left-0 top-0 z-50">
@@ -432,7 +409,6 @@ export default function App() {
       exit={{ opacity: 0 }}
       className="w-full flex flex-col items-center bg-white"
     >
-      <SubNavbar />
       
       {/* Hero Section */}
       <section className="w-full flex flex-col lg:flex-row items-center justify-between py-24 gap-12 lg:gap-20">
@@ -809,6 +785,9 @@ export default function App() {
             orders={orders} 
             onNavigate={(tab) => setActiveTab(tab)} 
           />
+        )}
+        {activeTab === 'AI Services' && (
+          <AIServicesPage />
         )}
         {activeTab === 'Services' && (
           <ServicesView 
