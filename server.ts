@@ -23,7 +23,7 @@ const __dirname = path.dirname(__filename);
 if (!admin.apps.length) {
   admin.initializeApp({
     // Use your project ID from the config
-    projectId: "ai-studio-applet-webapp-a5612",
+    projectId: "jtech-99b8b",
   });
 }
 

@@ -4,21 +4,22 @@ import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, where
 import { getAnalytics } from 'firebase/analytics';
 
 // Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  projectId: "ai-studio-applet-webapp-a5612",
-  appId: "1:175666120564:web:f9dbc0b658f15295638e21",
-  apiKey: "AIzaSyCl1Jw_pLFdBo5KAPS2WooZR1dRAeuSRPk",
-  authDomain: "ai-studio-applet-webapp-a5612.firebaseapp.com",
-  firestoreDatabaseId: "ai-studio-76a8e63c-8bd5-4f29-b20a-0c621db063d0",
-  storageBucket: "ai-studio-applet-webapp-a5612.firebasestorage.app",
-  messagingSenderId: "175666120564",
-  measurementId: ""
+  apiKey: "AIzaSyD27P1VBA0f8u3tjEw5qZm-92vOYUXMe7s",
+  authDomain: "jtech-99b8b.firebaseapp.com",
+  databaseURL: "https://jtech-99b8b-default-rtdb.firebaseio.com",
+  projectId: "jtech-99b8b",
+  storageBucket: "jtech-99b8b.firebasestorage.app",
+  messagingSenderId: "1061377743929",
+  appId: "1:1061377743929:web:6fcf2fbdc0cf1b46b481e8",
+  measurementId: "G-MZR6P9VNCS"
 };
 
 // Initialize Firebase SDK
 const app = initializeApp(firebaseConfig);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
