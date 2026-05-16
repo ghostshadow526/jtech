@@ -239,11 +239,45 @@ app.post("/api/webhook/paystack", async (req, res) => {
     if (event.event === 'charge.success') {
       const { authorization, customer } = event.data;
       const amount = event.data.amount / 100; // Convert from kobo to Naira
+      const reference = event.data.reference;
+      const email = customer.email;
 
-      console.log(`Payment successful - Amount: ${amount}, Reference: ${event.data.reference}`);
+      console.log(`Payment successful - Amount: ${amount}, Reference: ${reference}, Email: ${email}`);
 
-      // The balance update is handled on the client side immediately after successful payment
-      // This webhook is for logging and future analytics
+      try {
+        // Find user by email
+        const usersSnapshot = await db.collection('users')
+          .where('email', '==', email)
+          .limit(1)
+          .get();
+
+        if (!usersSnapshot.empty) {
+          const userId = usersSnapshot.docs[0].id;
+
+          // Record payment transaction
+          await db.collection('payments').add({
+            userId: userId,
+            email: email,
+            amount: amount,
+            currency: 'NGN',
+            reference: reference,
+            status: 'completed',
+            description: 'Fund deposit via Paystack',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            paystackData: {
+              authorization: authorization,
+              customer: customer,
+            }
+          });
+
+          console.log(`Payment recorded - User: ${userId}, Amount: ${amount}`);
+        } else {
+          console.warn(`User not found for email: ${email}`);
+        }
+      } catch (recordError) {
+        console.error('Error recording payment transaction:', recordError);
+        // Don't fail the webhook response - payment was successful on Paystack side
+      }
     }
 
     res.json({ success: true });

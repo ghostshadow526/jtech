@@ -23,8 +23,8 @@ export const AIServicesPage = () => {
         setLoading(true);
         setError(null);
 
-        // Fetch from Firestore "ai services" collection
-        const servicesCollection = collection(db, 'ai services');
+        // Fetch from Firestore "aiServices" collection
+        const servicesCollection = collection(db, 'aiServices');
         const q = query(servicesCollection);
         const querySnapshot = await getDocs(q);
 

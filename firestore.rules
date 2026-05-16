@@ -103,18 +103,20 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    // Allow public read access to services, ai services, products
+    // Services collection
     match /services/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    match /ai\ services/{document=**} {
+    // Products collection
+    match /products/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    match /products/{document=**} {
+    // AI Services collection
+    match /aiServices/{document=**} {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -125,6 +127,12 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update: if isAdmin();
       allow delete: if false;
+    }
+
+    // Payments collection - stores payment transaction history
+    match /payments/{document=**} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if false; // Only backend (via admin SDK) writes to this collection
     }
 
     // Default deny
