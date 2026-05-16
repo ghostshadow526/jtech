@@ -212,6 +212,47 @@ app.get("/api/order/status/:order_id", async (req, res) => {
   }
 });
 
+// 5. Paystack Webhook
+app.post("/api/webhook/paystack", async (req, res) => {
+  try {
+    const hash = req.headers['x-paystack-signature'];
+    const secret = process.env.PAYSTACK_SECRET_KEY;
+
+    if (!secret) {
+      console.error("PAYSTACK_SECRET_KEY is not set");
+      return res.status(500).json({ error: "Webhook verification failed" });
+    }
+
+    // Verify the signature
+    const crypto = await import('crypto');
+    const expectedHash = crypto.createHmac('sha512', secret)
+      .update(JSON.stringify(req.body))
+      .digest('hex');
+
+    if (hash !== expectedHash) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const event = req.body;
+
+    // Handle successful payment event
+    if (event.event === 'charge.success') {
+      const { authorization, customer } = event.data;
+      const amount = event.data.amount / 100; // Convert from kobo to Naira
+
+      console.log(`Payment successful - Amount: ${amount}, Reference: ${event.data.reference}`);
+
+      // The balance update is handled on the client side immediately after successful payment
+      // This webhook is for logging and future analytics
+    }
+
+    res.json({ success: true });
+  } catch (error: any) {
+    console.error("Webhook error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
