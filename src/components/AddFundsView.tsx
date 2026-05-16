@@ -19,7 +19,7 @@ export const AddFundsView = () => {
   const [paystackLoaded, setPaystackLoaded] = useState(false);
 
   const predefinedAmounts = [5000, 10000, 25000, 50000, 100000];
-  const PAYSTACK_PUBLIC_KEY = 'pk_live_cf2748615538818ad7b36689672b5c05ea2caaac';
+  const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_live_cf2748615538818ad7b36689672b5c05ea2caaac';
 
   // Load Paystack script
   useEffect(() => {
