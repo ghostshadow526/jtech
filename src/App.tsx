@@ -853,10 +853,10 @@ export default function App() {
           <div className="w-full max-w-7xl px-6 lg:px-10">
             <AnimatePresence mode="wait">
               {view === 'home' && renderHome()}
-              {view === 'social-media-boosting' && <SocialMediaBoostingPage onBack={() => setView('home')} />}
-              {view === 'ai-subscriptions' && <AISubscriptionsPage onBack={() => setView('home')} />}
+              {view === 'social-media-boosting' && <SocialMediaBoostingPage onBack={() => setView('home')} onNavigateToAuth={() => navigateToAuth('signup')} />}
+              {view === 'ai-subscriptions' && <AISubscriptionsPage onBack={() => setView('home')} onNavigateToAuth={() => navigateToAuth('signup')} />}
               {view === 'marketing-promotions' && <MarketingPromotionsPage onBack={() => setView('home')} />}
-              {view === 'products' && <ProductsPage onBack={() => setView('home')} />}
+              {view === 'products' && <ProductsPage onBack={() => setView('home')} onNavigateToAuth={() => navigateToAuth('signup')} />}
               {view === 'solutions' && <SolutionsPage onBack={() => setView('home')} />}
               {view === 'resources' && <ResourcesPage onBack={() => setView('home')} />}
               {view === 'ai-tools' && <AIToolsMarketplace onBack={() => setView('home')} />}

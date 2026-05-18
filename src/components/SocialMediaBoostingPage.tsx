@@ -3,9 +3,10 @@ import { motion } from 'motion/react';
 
 interface SocialMediaBoostingPageProps {
   onBack: () => void;
+  onNavigateToAuth?: () => void;
 }
 
-export function SocialMediaBoostingPage({ onBack }: SocialMediaBoostingPageProps) {
+export function SocialMediaBoostingPage({ onBack, onNavigateToAuth }: SocialMediaBoostingPageProps) {
   return (
     <div className="w-full">
       {/* Header */}
@@ -106,7 +107,7 @@ export function SocialMediaBoostingPage({ onBack }: SocialMediaBoostingPageProps
             <p className="text-brand-600 text-sm mb-6">
               Ready to boost your social media presence? Our team is ready to help you achieve unprecedented growth.
             </p>
-            <button className="w-full bg-notion-blue text-white py-3 rounded-lg font-bold hover:bg-notion-blue-hover transition-all shadow-lg">
+            <button onClick={onNavigateToAuth} className="w-full bg-notion-blue text-white py-3 rounded-lg font-bold hover:bg-notion-blue-hover transition-all shadow-lg">
               Learn about our network
             </button>
           </motion.div>
@@ -160,7 +161,7 @@ export function SocialMediaBoostingPage({ onBack }: SocialMediaBoostingPageProps
           <p className="text-brand-100 text-lg mb-8 max-w-2xl mx-auto">
             Join thousands of brands leveraging our infrastructure to achieve unprecedented growth and digital authority.
           </p>
-          <button className="inline-flex items-center gap-2 bg-white text-brand-950 px-8 py-3 rounded-lg font-bold hover:bg-brand-50 transition-all">
+          <button onClick={onNavigateToAuth} className="inline-flex items-center gap-2 bg-white text-brand-950 px-8 py-3 rounded-lg font-bold hover:bg-brand-50 transition-all">
             Get started today <ArrowRight className="w-4 h-4" />
           </button>
         </motion.section>

@@ -3,9 +3,10 @@ import { motion } from 'motion/react';
 
 interface PricingPageProps {
   onBack: () => void;
+  onNavigateToAuth?: () => void;
 }
 
-export function PricingPage({ onBack }: PricingPageProps) {
+export function PricingPage({ onBack, onNavigateToAuth }: PricingPageProps) {
   return (
     <div className="w-full">
       <div className="border-b border-brand-100 bg-white sticky top-0 z-50 py-4">
@@ -88,7 +89,7 @@ export function PricingPage({ onBack }: PricingPageProps) {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-3 rounded-lg font-bold transition-all ${
+              <button onClick={onNavigateToAuth} className={`w-full py-3 rounded-lg font-bold transition-all ${
                 plan.featured
                   ? 'bg-notion-blue text-white hover:bg-blue-700'
                   : 'bg-brand-100 text-brand-950 hover:bg-brand-200'

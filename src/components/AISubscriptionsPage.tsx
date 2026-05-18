@@ -3,9 +3,10 @@ import { motion } from 'motion/react';
 
 interface AISubscriptionsPageProps {
   onBack: () => void;
+  onNavigateToAuth?: () => void;
 }
 
-export function AISubscriptionsPage({ onBack }: AISubscriptionsPageProps) {
+export function AISubscriptionsPage({ onBack, onNavigateToAuth }: AISubscriptionsPageProps) {
   return (
     <div className="w-full">
       {/* Header */}
@@ -172,7 +173,7 @@ export function AISubscriptionsPage({ onBack }: AISubscriptionsPageProps) {
           <p className="text-brand-100 text-lg mb-8 max-w-2xl mx-auto">
             Get instant access to the world's most advanced neural networks and start building AI-powered solutions.
           </p>
-          <button className="inline-flex items-center gap-2 bg-white text-brand-950 px-8 py-3 rounded-lg font-bold hover:bg-brand-50 transition-all">
+          <button onClick={onNavigateToAuth} className="inline-flex items-center gap-2 bg-white text-brand-950 px-8 py-3 rounded-lg font-bold hover:bg-brand-50 transition-all">
             Get started with AI <ArrowRight className="w-4 h-4" />
           </button>
         </motion.section>

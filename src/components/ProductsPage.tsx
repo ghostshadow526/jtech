@@ -3,9 +3,10 @@ import { motion } from 'motion/react';
 
 interface ProductsPageProps {
   onBack: () => void;
+  onNavigateToAuth?: () => void;
 }
 
-export function ProductsPage({ onBack }: ProductsPageProps) {
+export function ProductsPage({ onBack, onNavigateToAuth }: ProductsPageProps) {
   return (
     <div className="w-full">
       {/* Header */}
@@ -100,7 +101,7 @@ export function ProductsPage({ onBack }: ProductsPageProps) {
           <p className="text-brand-100 text-lg mb-8 max-w-2xl mx-auto">
             Choose the product suite that fits your needs and start growing today.
           </p>
-          <button className="inline-flex items-center gap-2 bg-white text-brand-950 px-8 py-3 rounded-lg font-bold hover:bg-brand-50 transition-all">
+          <button onClick={onNavigateToAuth} className="inline-flex items-center gap-2 bg-white text-brand-950 px-8 py-3 rounded-lg font-bold hover:bg-brand-50 transition-all">
             Get Started <ArrowRight className="w-4 h-4" />
           </button>
         </motion.section>

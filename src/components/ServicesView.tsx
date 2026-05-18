@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Search, Loader2, AlertCircle, Grid3X3, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Grid3X3, ChevronDown } from 'lucide-react';
 import { ServiceCard } from './ServiceCard';
 
 interface ServicesViewProps {
@@ -26,12 +26,21 @@ export const ServicesView = ({
   placeOrder,
   balance
 }: ServicesViewProps) => {
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
   React.useEffect(() => {
-    console.log("ServicesView - services:", Object.keys(services).length, "categories");
-    console.log("ServicesView - selectedCategory:", selectedCategory);
-    console.log("ServicesView - servicesLoading:", servicesLoading);
-    console.log("ServicesView - servicesError:", servicesError);
-  }, [services, selectedCategory, servicesLoading, servicesError]);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isDropdownOpen]);
 
   if (servicesLoading) {
     return (
@@ -105,47 +114,47 @@ export const ServicesView = ({
       </div>
 
       <div className="flex flex-col gap-8">
-        <div className="relative -mx-2 px-8">
-          <button
-            type="button"
-            onClick={() => scrollCategories('left')}
-            className="hidden sm:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black transition-colors"
-            aria-label="Scroll categories left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollCategories('right')}
-            className="hidden sm:flex absolute right-0 top-1/2 -translate-y-1/2 z-10 h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black transition-colors"
-            aria-label="Scroll categories right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+        <div className="relative">
+          <div ref={dropdownRef} className="relative w-full md:w-64">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full px-5 py-3 rounded-lg text-sm font-medium bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100 flex items-center justify-between hover:border-gray-400 dark:hover:border-gray-700 transition-all"
+            >
+              <span>{selectedCategory || 'Select a category'}</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
 
-          <div
-            ref={categoriesScrollRef}
-            className="flex gap-3 overflow-x-auto pb-3 no-scrollbar"
-          >
-          {categories.length > 0 ? (
-            categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2 rounded-full text-xs whitespace-nowrap transition-all border ${
-                  selectedCategory === cat 
-                    ? 'bg-gray-900 text-white border-gray-900 shadow-sm' 
-                    : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:border-gray-400'
-                }`}
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg z-20 max-h-64 overflow-y-auto"
               >
-                {cat}
-              </button>
-            ))
-          ) : (
-            <div className="w-full py-8 text-center text-gray-500">
-              No categories available. Services may still be loading...
-            </div>
-          )}
+                {Object.keys(services).length > 0 ? (
+                  Object.keys(services).map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full px-5 py-3 text-left text-sm transition-all border-b border-gray-100 dark:border-gray-800 last:border-b-0 ${
+                        selectedCategory === cat 
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium' 
+                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-gray-500 text-sm">
+                    No categories available
+                  </div>
+                )}
+              </motion.div>
+            )}
           </div>
         </div>
 
