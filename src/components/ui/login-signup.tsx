@@ -27,7 +27,7 @@ import {
 
 interface LoginCardSectionProps {
   onLogin: (email: string, pass: string) => void;
-  onSignUp: (email: string, pass: string) => void;
+  onSignUp: (email: string, pass: string, name: string) => void;
   onGoogleLogin: () => void;
   isLoading: boolean;
   error: string;
@@ -46,6 +46,7 @@ export default function LoginCardSection({
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
@@ -111,7 +112,7 @@ export default function LoginCardSection({
     if (mode === 'login') {
       onLogin(email, password);
     } else {
-      onSignUp(email, password);
+      onSignUp(email, password, name);
     }
   };
 
@@ -201,6 +202,23 @@ export default function LoginCardSection({
 
           <CardContent className="grid gap-5">
             <form onSubmit={handleSubmit} className="grid gap-5">
+              {mode === 'signup' && (
+                <div className="grid gap-2">
+                  <Label htmlFor="name" className="text-zinc-300">
+                    Full Name
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    className="bg-zinc-950 border-zinc-800 text-zinc-50 placeholder:text-zinc-600"
+                  />
+                </div>
+              )}
+
               <div className="grid gap-2">
                 <Label htmlFor="email" className="text-zinc-300">
                   Email

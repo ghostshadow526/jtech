@@ -192,11 +192,19 @@ export default function App() {
     }
   };
 
-  const handleSignUp = async (e: string, p: string) => {
+  const handleSignUp = async (e: string, p: string, n: string) => {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      await createUserWithEmailAndPassword(auth, e, p);
+      const userCredential = await createUserWithEmailAndPassword(auth, e, p);
+      // Store user data in Firestore
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        uid: userCredential.user.uid,
+        email: e,
+        name: n,
+        balance: 0,
+        createdAt: serverTimestamp()
+      });
     } catch (error: any) {
       setAuthError(getAuthErrorMessage(error.code));
     } finally {
