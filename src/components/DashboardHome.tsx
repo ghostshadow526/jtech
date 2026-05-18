@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, TrendingUp, Users, ShoppingCart, Package, Activity, Bell } from 'lucide-react';
+import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell } from 'lucide-react';
 import { FeaturedServicesSection } from './FeaturedServicesSection';
 
 interface DashboardHomeProps {
@@ -19,7 +19,7 @@ export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProp
         <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <DollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="h-5 w-5 text-blue-600 dark:text-blue-400 text-lg font-bold">₦</span>
             </div>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </div>

@@ -20,10 +20,8 @@ import { SocialMediaBoostingPage } from './components/SocialMediaBoostingPage';
 import { AISubscriptionsPage } from './components/AISubscriptionsPage';
 import { MarketingPromotionsPage } from './components/MarketingPromotionsPage';
 import { ProductsPage } from './components/ProductsPage';
-import { DownloadPage } from './components/DownloadPage';
 import { SolutionsPage } from './components/SolutionsPage';
 import { ResourcesPage } from './components/ResourcesPage';
-import { PricingPage } from './components/PricingPage';
 import { AIToolsMarketplace } from './components/AIToolsMarketplace';
 import { AIServicesPage } from './components/AIServicesPage';
 import { AdminLayout } from './components/admin/AdminLayout';
@@ -31,7 +29,7 @@ import { RegistrationsSection } from './components/admin/RegistrationsSection';
 import { PaymentsSection } from './components/admin/PaymentsSection';
 import { AIToolsSection } from './components/admin/AIToolsSection';
 
-type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'download' | 'solutions' | 'resources' | 'pricing' | 'ai-tools' | 'ai-services' | 'admin';
+type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'solutions' | 'resources' | 'ai-tools' | 'ai-services' | 'admin';
 
 interface SMMService {
   service: string;
@@ -167,17 +165,28 @@ export default function App() {
     setView('auth');
   };
 
+  const getAuthErrorMessage = (errorCode: string): string => {
+    const errorMessages: Record<string, string> = {
+      'auth/user-not-found': 'Wrong email or password entered',
+      'auth/wrong-password': 'Wrong email or password entered',
+      'auth/invalid-email': 'Please enter a valid email address',
+      'auth/user-disabled': 'Your account has been disabled. Please contact support.',
+      'auth/email-already-in-use': 'This email is already registered. Please log in instead.',
+      'auth/weak-password': 'Password must be at least 6 characters long.',
+      'auth/too-many-requests': 'Too many login attempts. Please try again later.',
+      'auth/operation-not-allowed': 'Email/Password sign-in is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.',
+      'auth/invalid-credential': 'Wrong email or password entered',
+    };
+    return errorMessages[errorCode] || 'An error occurred. Please try again.';
+  };
+
   const handleLogin = async (e: string, p: string) => {
     setAuthLoading(true);
     setAuthError(null);
     try {
       await signInWithEmailAndPassword(auth, e, p);
     } catch (error: any) {
-      if (error.code === 'auth/operation-not-allowed') {
-        setAuthError("Email/Password sign-in is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.");
-      } else {
-        setAuthError(error.message);
-      }
+      setAuthError(getAuthErrorMessage(error.code));
     } finally {
       setAuthLoading(false);
     }
@@ -189,11 +198,7 @@ export default function App() {
     try {
       await createUserWithEmailAndPassword(auth, e, p);
     } catch (error: any) {
-      if (error.code === 'auth/operation-not-allowed') {
-        setAuthError("Email/Password sign-in is not enabled. Please enable it in the Firebase Console under Authentication > Sign-in method.");
-      } else {
-        setAuthError(error.message);
-      }
+      setAuthError(getAuthErrorMessage(error.code));
     } finally {
       setAuthLoading(false);
     }
@@ -268,10 +273,8 @@ export default function App() {
           <div className="hidden lg:flex items-center gap-6">
             {[
               { name: 'Product', view: 'products' },
-              { name: 'Download', view: 'download' },
               { name: 'Solutions', view: 'solutions' },
               { name: 'Resources', view: 'resources' },
-              { name: 'Pricing', view: 'pricing' },
             ].map((item) => (
               <button key={item.name} onClick={() => setView(item.view as View)} className="text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors flex items-center gap-1">
                 {item.name}
@@ -854,10 +857,8 @@ export default function App() {
               {view === 'ai-subscriptions' && <AISubscriptionsPage onBack={() => setView('home')} />}
               {view === 'marketing-promotions' && <MarketingPromotionsPage onBack={() => setView('home')} />}
               {view === 'products' && <ProductsPage onBack={() => setView('home')} />}
-              {view === 'download' && <DownloadPage onBack={() => setView('home')} />}
               {view === 'solutions' && <SolutionsPage onBack={() => setView('home')} />}
               {view === 'resources' && <ResourcesPage onBack={() => setView('home')} />}
-              {view === 'pricing' && <PricingPage onBack={() => setView('home')} />}
               {view === 'ai-tools' && <AIToolsMarketplace onBack={() => setView('home')} />}
             </AnimatePresence>
           </div>

@@ -253,24 +253,34 @@ app.post("/api/webhook/paystack", async (req, res) => {
 
         if (!usersSnapshot.empty) {
           const userId = usersSnapshot.docs[0].id;
+          const userRef = db.collection('users').doc(userId);
 
-          // Record payment transaction
-          await db.collection('payments').add({
-            userId: userId,
-            email: email,
-            amount: amount,
-            currency: 'NGN',
-            reference: reference,
-            status: 'completed',
-            description: 'Fund deposit via Paystack',
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            paystackData: {
-              authorization: authorization,
-              customer: customer,
-            }
+          // Record payment transaction and update balance in a transaction
+          await db.runTransaction(async (transaction) => {
+            // Update user balance
+            transaction.update(userRef, {
+              balance: admin.firestore.FieldValue.increment(amount)
+            });
+
+            // Record payment transaction
+            const paymentRef = db.collection('payments').doc();
+            transaction.set(paymentRef, {
+              userId: userId,
+              email: email,
+              amount: amount,
+              currency: 'NGN',
+              reference: reference,
+              status: 'completed',
+              description: 'Fund deposit via Paystack',
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              paystackData: {
+                authorization: authorization,
+                customer: customer,
+              }
+            });
           });
 
-          console.log(`Payment recorded - User: ${userId}, Amount: ${amount}`);
+          console.log(`Payment recorded and balance updated - User: ${userId}, Amount: ${amount}`);
         } else {
           console.warn(`User not found for email: ${email}`);
         }

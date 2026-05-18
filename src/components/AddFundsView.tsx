@@ -111,8 +111,8 @@ export const AddFundsView = () => {
       className="w-full max-w-4xl space-y-10"
     >
       <div>
-        <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Infrastructure Credits</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md">Recharge your account to deploy new engagement infrastructures. All transactions are processed securely through Paystack.</p>
+        <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Add Funds</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md">Deposit funds into your account to purchase services and boost your campaigns. All transactions are processed securely through Paystack.</p>
       </div>
 
       {/* Messages */}

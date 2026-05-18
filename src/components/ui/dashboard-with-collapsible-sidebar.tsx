@@ -257,7 +257,7 @@ const Header = ({ isDark, setIsDark, user, balance }: any) => {
   return (
     <div className="flex items-center justify-between p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">SMM Panel</h1>
+        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, {user?.email}</p>
       </div>
       <div className="flex items-center gap-4">
