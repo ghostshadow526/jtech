@@ -429,7 +429,7 @@ export default function App() {
           transition={{ delay: 0.2 }}
           className="flex flex-col items-start gap-6 text-left lg:w-[50%]"
         >
-          <h1 className="text-6xl md:text-7xl xl:text-[84px] font-bold text-brand-950 leading-[1.05] tracking-tight">
+          <h1 className="text-4xl md:text-5xl xl:text-6xl font-bold text-brand-950 leading-[1.05] tracking-tight">
             Powerful digital authority, without the chaos
           </h1>
           <p className="mt-4 text-brand-600 text-lg md:text-xl max-w-xl font-medium leading-relaxed">
@@ -441,7 +441,7 @@ export default function App() {
               onClick={() => navigateToAuth('signup')}
               className="bg-notion-blue text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-notion-blue-hover transition-all shadow-lg shadow-notion-blue/20"
             >
-              Get JT Tech free
+              Get Started
             </button>
           </div>
         </motion.div>
