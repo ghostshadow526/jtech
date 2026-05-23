@@ -10,17 +10,32 @@ const SMM_API_URL = "https://smexploits.com/api/v2";
 const SMM_API_KEY = process.env.SMM_API_KEY;
 
 // Initialize Firebase Admin
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      projectId: "jtech-99b8b",
-    });
-  } catch (error) {
-    console.error("Firebase initialization error:", error);
-  }
-}
+let db: admin.firestore.Firestore;
 
-const db = admin.firestore();
+function initializeFirebase() {
+  if (admin.apps.length === 0) {
+    try {
+      // Try using FIREBASE_SERVICE_ACCOUNT environment variable (base64 encoded JSON)
+      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+        const serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT, 'base64').toString('utf-8');
+        const serviceAccount = JSON.parse(serviceAccountJson);
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          projectId: "jtech-99b8b",
+        });
+      } else {
+        // For Cloud Run or environments with default credentials
+        admin.initializeApp({
+          projectId: "jtech-99b8b",
+        });
+      }
+    } catch (error) {
+      console.error("Firebase initialization error:", error);
+      throw error;
+    }
+  }
+  return admin.firestore();
+}
 
 export default async function handler(req: any, res: any) {
   // Enable CORS
@@ -43,6 +58,9 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    // Initialize Firebase
+    const database = initializeFirebase();
+    
     const { uid, service_id, quantity, link } = req.body;
 
     // 1. Validate input
@@ -51,7 +69,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // 2. Get user balance from Firestore
-    const userRef = db.collection("users").doc(uid);
+    const userRef = database.collection("users").doc(uid);
     const userDoc = await userRef.get();
     if (!userDoc.exists) {
       return res.status(404).json({ error: "User not found" });
@@ -117,12 +135,12 @@ export default async function handler(req: any, res: any) {
     const smm_order_id = orderRes.data.order;
 
     // 7. Update user balance in Firestore and store order
-    await db.runTransaction(async (transaction) => {
+    await database.runTransaction(async (transaction) => {
       transaction.update(userRef, {
         balance: admin.firestore.FieldValue.increment(-cost)
       });
 
-      const orderRef = db.collection("orders").doc();
+      const orderRef = database.collection("orders").doc();
       transaction.set(orderRef, {
         user_id: uid,
         service_id,
