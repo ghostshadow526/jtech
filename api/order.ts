@@ -11,9 +11,13 @@ const SMM_API_KEY = process.env.SMM_API_KEY;
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
-  admin.initializeApp({
-    projectId: process.env.FIREBASE_PROJECT_ID,
-  });
+  try {
+    admin.initializeApp({
+      projectId: "jtech-99b8b",
+    });
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+  }
 }
 
 const db = admin.firestore();
@@ -133,7 +137,8 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json({ success: true, order_id: smm_order_id, cost: cost });
   } catch (error: any) {
-    console.error("Order error:", error.message);
-    return res.status(500).json({ error: error.message || "Failed to place order" });
+    console.error("Order error:", error?.message || error);
+    console.error("Full error:", error);
+    return res.status(500).json({ error: error?.message || "Failed to place order" });
   }
 }
