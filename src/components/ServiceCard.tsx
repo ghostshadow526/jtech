@@ -3,12 +3,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Loader2, ChevronRight, ShoppingCart } from 'lucide-react';
 
 export function ServiceCard({ service, onOrder, balance }: any) {
-  const [quantity, setQuantity] = useState(parseInt(service.min));
+  const minQty = parseInt(service.min) || 1;
+  const [quantity, setQuantity] = useState(minQty);
   const [link, setLink] = useState('');
   const [isOrdering, setIsOrdering] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
-  const cost = (parseFloat(service.rate) / 1000) * quantity;
+  const validQuantity = isNaN(quantity) ? minQty : quantity;
+  const cost = (parseFloat(service.rate) / 1000) * validQuantity;
   const canAfford = balance >= cost;
 
   return (
@@ -37,7 +39,10 @@ export function ServiceCard({ service, onOrder, balance }: any) {
                 min={service.min}
                 max={service.max}
                 value={quantity}
-                onChange={(e) => setQuantity(parseInt(e.target.value))}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setQuantity(val === '' ? minQty : parseInt(val) || minQty);
+                }}
                 className="w-full h-11 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[11px] text-gray-400">Units</div>
@@ -71,7 +76,7 @@ export function ServiceCard({ service, onOrder, balance }: any) {
           disabled={!canAfford || !link || isOrdering}
           onClick={async () => {
             setIsOrdering(true);
-            await onOrder(service.service, quantity, link);
+            await onOrder(service.service, validQuantity, link);
             setIsOrdering(false);
             setLink('');
           }}

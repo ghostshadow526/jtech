@@ -208,7 +208,7 @@ const Logo = () => {
     <div className="grid size-10 shrink-0 place-content-center rounded-lg bg-gray-900 text-white shadow-sm">
       <svg
         width="20"
-        height="auto"
+        height="20"
         viewBox="0 0 50 39"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
