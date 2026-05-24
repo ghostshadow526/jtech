@@ -796,7 +796,8 @@ export default function App() {
           <DashboardHome 
             balance={balance} 
             orders={orders} 
-            onNavigate={(tab) => setActiveTab(tab)} 
+            onNavigate={(tab) => setActiveTab(tab)}
+            user={user}
           />
         )}
         {activeTab === 'AI Services' && (

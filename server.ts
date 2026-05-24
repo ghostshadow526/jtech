@@ -268,6 +268,87 @@ app.get("/api/order/status/:order_id", async (req, res) => {
   }
 });
 
+// 4a. Check and update all pending orders from Firestore
+app.post("/api/orders/check-status", async (req, res) => {
+  try {
+    const { uid } = req.body; // Optional - if provided, only check user's orders
+    
+    // Get all pending orders
+    let query = db.collection("orders").where("status", "in", ["pending", "processing"]);
+    if (uid) {
+      query = query.where("user_id", "==", uid);
+    }
+    
+    const ordersSnapshot = await query.get();
+    const updates: any[] = [];
+
+    for (const orderDoc of ordersSnapshot.docs) {
+      const order = orderDoc.data();
+      const smm_order_id = order.smm_order_id;
+
+      try {
+        // Check status from SMM API
+        const params = new URLSearchParams();
+        params.append('key', SMM_API_KEY);
+        params.append('action', 'status');
+        params.append('order', smm_order_id);
+
+        const response = await axios.post(SMM_API_URL, params.toString(), {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          httpsAgent,
+          timeout: 10000
+        });
+
+        const statusData = response.data;
+        
+        // SMM API returns status as a number where 0 or similar might mean completed
+        // Typically: charge = in progress, empty/done = completed
+        // Parse based on what the API returns
+        let newStatus = order.status;
+        let isComplete = false;
+
+        // If the order status shows "Completed" or charge is 0 or the order completed_at is set
+        if (statusData.status === 'Completed' || 
+            statusData.charge === 0 || 
+            statusData.charge === "0" ||
+            statusData.remains === 0 ||
+            statusData.remains === "0") {
+          isComplete = true;
+          newStatus = 'completed';
+        }
+
+        if (isComplete && order.status !== 'completed') {
+          console.log(`Order ${smm_order_id} is complete, updating status...`);
+          updates.push({
+            docRef: orderDoc.ref,
+            newStatus: newStatus
+          });
+        }
+      } catch (orderError: any) {
+        console.error(`Error checking order ${smm_order_id}:`, orderError.message);
+        // Continue with next order if one fails
+      }
+    }
+
+    // Update all completed orders in Firestore
+    for (const update of updates) {
+      await update.docRef.update({
+        status: update.newStatus,
+        completedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    res.json({ 
+      success: true, 
+      message: `Checked ${ordersSnapshot.size} orders, updated ${updates.length}`,
+      updatedCount: updates.length
+    });
+  } catch (error: any) {
+    console.error("Error checking orders:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 5. Paystack Webhook
 app.post("/api/webhook/paystack", async (req, res) => {
   try {
@@ -353,6 +434,51 @@ app.post("/api/webhook/paystack", async (req, res) => {
   }
 });
 
+// Background job to check pending orders periodically
+async function checkPendingOrders() {
+  try {
+    const query = db.collection("orders").where("status", "in", ["pending", "processing"]);
+    const ordersSnapshot = await query.get();
+
+    for (const orderDoc of ordersSnapshot.docs) {
+      const order = orderDoc.data();
+      const smm_order_id = order.smm_order_id;
+
+      try {
+        const params = new URLSearchParams();
+        params.append('key', SMM_API_KEY);
+        params.append('action', 'status');
+        params.append('order', smm_order_id);
+
+        const response = await axios.post(SMM_API_URL, params.toString(), {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          httpsAgent,
+          timeout: 10000
+        });
+
+        const statusData = response.data;
+
+        if (statusData.status === 'Completed' || 
+            statusData.charge === 0 || 
+            statusData.charge === "0" ||
+            statusData.remains === 0 ||
+            statusData.remains === "0") {
+          
+          console.log(`[Auto-check] Order ${smm_order_id} is complete, updating status...`);
+          await orderDoc.ref.update({
+            status: 'completed',
+            completedAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } catch (orderError: any) {
+        console.error(`[Auto-check] Error checking order ${smm_order_id}:`, orderError.message);
+      }
+    }
+  } catch (error: any) {
+    console.error("[Auto-check] Error in background job:", error.message);
+  }
+}
+
 async function startServer() {
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
@@ -372,6 +498,10 @@ async function startServer() {
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
+
+  // Start background job to check pending orders every 30 seconds
+  setInterval(checkPendingOrders, 30000);
+  console.log("Background order status checker started (checking every 30 seconds)");
 }
 
 startServer();

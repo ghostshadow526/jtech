@@ -1,17 +1,43 @@
-import React from 'react';
-import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell, Eye, EyeOff } from 'lucide-react';
+import React, { useState } from 'react';
+import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell, Eye, EyeOff, RotateCcw, Loader2 } from 'lucide-react';
 import { FeaturedServicesSection } from './FeaturedServicesSection';
 
 interface DashboardHomeProps {
   balance: number;
   orders: any[];
   onNavigate: (tab: string) => void;
+  user?: any;
 }
 
-export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProps) => {
+export const DashboardHome = ({ balance, orders, onNavigate, user }: DashboardHomeProps) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState('');
   const ordersCount = orders.length;
   const recentOrders = orders.slice(0, 5);
   const pendingOrdersCount = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
+  
+  const handleRefreshOrders = async () => {
+    setIsRefreshing(true);
+    setRefreshMessage('');
+    try {
+      const response = await fetch('/api/orders/check-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: user?.uid })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setRefreshMessage(`Updated ${data.updatedCount} order(s) status`);
+        setTimeout(() => setRefreshMessage(''), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to refresh orders:', error);
+      setRefreshMessage('Failed to check order status');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+  
   return (
     <div className="space-y-8">
       {/* Stats Grid */}
@@ -73,12 +99,30 @@ export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProp
         <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Orders History</h3>
-            <button 
-              onClick={() => onNavigate('orders')}
-              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-            >
-              View all
-            </button>
+            <div className="flex items-center gap-3">
+              {refreshMessage && (
+                <span className="text-xs text-green-600 dark:text-green-400 font-medium">{refreshMessage}</span>
+              )}
+              <button 
+                onClick={handleRefreshOrders}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Check if pending orders are complete"
+              >
+                {isRefreshing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RotateCcw className="h-4 w-4" />
+                )}
+                <span>Refresh</span>
+              </button>
+              <button 
+                onClick={() => onNavigate('orders')}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+              >
+                View all
+              </button>
+            </div>
           </div>
           
           {orders.length > 0 ? (
