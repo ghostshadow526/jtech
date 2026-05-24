@@ -48,12 +48,16 @@ export default async function handler(req: any, res: any) {
       // Apply 20% price markup to the service rate
       const markupMultiplier = 1.2;
       const originalRate = parseFloat(service.rate) || 0;
-      const newRate = (originalRate * markupMultiplier).toFixed(4);
+      const newRate = originalRate * markupMultiplier;
+      
+      // Log for debugging
+      console.log(`Service: ${service.name}, Original: ${originalRate}, Marked Up: ${newRate}`);
       
       acc[category].push({
         ...service,
-        rate: newRate,
-        originalRate: service.rate // Keep original for reference
+        rate: newRate.toString(), // Keep as string for API consistency
+        originalRate: service.rate,
+        markup: (newRate - originalRate).toFixed(2) // Show markup amount
       });
       return acc;
     }, {} as Record<string, any[]>);

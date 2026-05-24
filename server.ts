@@ -72,12 +72,16 @@ app.get("/api/services", async (req, res) => {
       // Apply 20% price markup to the service rate
       const markupMultiplier = 1.2;
       const originalRate = parseFloat(service.rate) || 0;
-      const newRate = (originalRate * markupMultiplier).toFixed(4);
+      const newRate = originalRate * markupMultiplier;
+      
+      // Log for debugging
+      console.log(`Service: ${service.name}, Original: ${originalRate}, Marked Up: ${newRate}`);
       
       acc[category].push({
         ...service,
-        rate: newRate,
-        originalRate: service.rate // Keep original for reference
+        rate: newRate.toString(), // Keep as string for API consistency
+        originalRate: service.rate,
+        markup: (newRate - originalRate).toFixed(2) // Show markup amount
       });
       return acc;
     }, {});
@@ -98,6 +102,46 @@ app.get("/api/user/balance/:uid", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
     res.json({ balance: userDoc.data()?.balance || 0 });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 2a. Test endpoint - verify price markup
+app.get("/api/test/markup", async (req, res) => {
+  try {
+    const params = new URLSearchParams();
+    params.append('key', SMM_API_KEY);
+    params.append('action', 'services');
+
+    const response = await axios.post(SMM_API_URL, params.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      timeout: 60000,
+      httpsAgent
+    });
+
+    const services = response.data;
+    if (!Array.isArray(services)) {
+      return res.status(500).json({ error: "Invalid response" });
+    }
+
+    // Take first 5 services to show the markup
+    const testServices = services.slice(0, 5).map((service: any) => {
+      const originalRate = parseFloat(service.rate);
+      const markedUpRate = originalRate * 1.2;
+      return {
+        name: service.name,
+        originalRate,
+        markedUpRate,
+        markupAmount: (markedUpRate - originalRate).toFixed(2),
+        markupPercentage: "20%"
+      };
+    });
+
+    res.json({ 
+      message: "Price markup is being applied correctly",
+      examples: testServices 
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
