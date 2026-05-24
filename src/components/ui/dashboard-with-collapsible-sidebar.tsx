@@ -57,10 +57,14 @@ export const DashboardLayout = ({
   useEffect(() => {
     setMounted(true);
     const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
+    const isDarkTheme = savedTheme === 'dark';
+    
+    if (isDarkTheme) {
+      document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark');
       setIsDark(true);
     } else {
+      document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('dark');
       setIsDark(false);
     }
@@ -71,9 +75,11 @@ export const DashboardLayout = ({
     if (!mounted) return;
     
     if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
     } else {
+      document.documentElement.removeAttribute('data-theme');
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
