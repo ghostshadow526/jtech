@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import { collection, query, limit, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { ServicesForSaleCard } from './ServicesForSaleCard';

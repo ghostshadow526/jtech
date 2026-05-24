@@ -1,17 +1,25 @@
 import React, { useState } from 'react';
-import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell, Eye, EyeOff, RotateCcw, Loader2 } from 'lucide-react';
+import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell, Eye, EyeOff, RotateCcw, Loader2, X, AlertCircle } from 'lucide-react';
 import { FeaturedServicesSection } from './FeaturedServicesSection';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface DashboardHomeProps {
   balance: number;
   orders: any[];
   onNavigate: (tab: string) => void;
   user?: any;
+  onPlaceOrder?: (serviceId: string, quantity: number, link: string) => Promise<void>;
 }
 
-export const DashboardHome = ({ balance, orders, onNavigate, user }: DashboardHomeProps) => {
+export const DashboardHome = ({ balance, orders, onNavigate, user, onPlaceOrder }: DashboardHomeProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState('');
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [quantity, setQuantity] = useState('1');
+  const [link, setLink] = useState('');
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const ordersCount = orders.length;
   const recentOrders = orders.slice(0, 5);
   const pendingOrdersCount = orders.filter(o => o.status === 'pending' || o.status === 'processing').length;
@@ -35,6 +43,42 @@ export const DashboardHome = ({ balance, orders, onNavigate, user }: DashboardHo
       setRefreshMessage('Failed to check order status');
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleAddToCart = (service: any) => {
+    setSelectedService(service);
+    setQuantity('1');
+    setLink('');
+    setOrderError(null);
+    setShowOrderModal(true);
+  };
+
+  const handlePlaceOrder = async () => {
+    if (!selectedService || !quantity || !link) {
+      setOrderError('Please fill in all fields');
+      return;
+    }
+
+    const qty = parseInt(quantity);
+    const totalCost = selectedService.price * qty;
+
+    if (totalCost > balance) {
+      setOrderError(`Insufficient balance. Cost: ₦${totalCost.toFixed(2)}, Balance: ₦${balance.toFixed(2)}`);
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    try {
+      if (onPlaceOrder) {
+        await onPlaceOrder(selectedService.id, qty, link);
+      }
+      setShowOrderModal(false);
+      setSelectedService(null);
+    } catch (error: any) {
+      setOrderError(error.message || 'Failed to place order');
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
   
@@ -183,6 +227,14 @@ export const DashboardHome = ({ balance, orders, onNavigate, user }: DashboardHo
         </div>
       </div>
       
+      {/* Featured Services Section */}
+      <div className="py-8">
+        <FeaturedServicesSection 
+          onViewAllServices={() => onNavigate('services')}
+          onAddToCart={handleAddToCart}
+        />
+      </div>
+      
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
@@ -230,6 +282,106 @@ export const DashboardHome = ({ balance, orders, onNavigate, user }: DashboardHo
             </div>
           </div>
         </div>
+
+      {/* Order Modal */}
+      <AnimatePresence>
+        {showOrderModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            onClick={() => setShowOrderModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-900 rounded-xl max-w-md w-full p-6 border border-gray-200 dark:border-gray-800"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Order: {selectedService?.name}
+                </h2>
+                <button
+                  onClick={() => setShowOrderModal(false)}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                </button>
+              </div>
+
+              {orderError && (
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-lg flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-700 dark:text-red-300">{orderError}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Price per unit: ₦{selectedService?.price?.toFixed(2) || '0.00'}
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Quantity
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Post Link / Username
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g., https://instagram.com/username"
+                    value={link}
+                    onChange={(e) => setLink(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900 rounded-lg p-3">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <strong>Total Cost:</strong> ₦{(selectedService?.price * parseInt(quantity || '1')).toFixed(2)}
+                  </p>
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    <strong>Available Balance:</strong> ₦{balance.toFixed(2)}
+                  </p>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowOrderModal(false)}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handlePlaceOrder}
+                    disabled={isPlacingOrder}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                  >
+                    {isPlacingOrder && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Place Order
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -799,6 +799,7 @@ export default function App() {
             orders={orders} 
             onNavigate={(tab) => setActiveTab(tab)}
             user={user}
+            onPlaceOrder={placeOrder}
           />
         )}
         {activeTab === 'AI Services' && (

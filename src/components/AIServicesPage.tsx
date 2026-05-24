@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Cpu, Loader2, AlertCircle, ShoppingCart } from 'lucide-react';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getAuth } from 'firebase/auth';
 
 interface AIService {
   id: string;
@@ -21,6 +22,25 @@ export const AIServicesPage = () => {
   const [services, setServices] = useState<AIService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number>(0);
+  const [selectedService, setSelectedService] = useState<AIService | null>(null);
+  const auth = getAuth();
+  const user = auth.currentUser;
+
+  // Fetch user balance
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (snapshot) => {
+      if (snapshot.exists()) {
+        setBalance(snapshot.data().balance || 0);
+      }
+    }, (error) => {
+      console.error('Error fetching balance:', error);
+    });
+
+    return () => unsubscribe();
+  }, [user?.uid]);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -50,6 +70,34 @@ export const AIServicesPage = () => {
     fetchServices();
   }, []);
 
+  const handlePurchase = (service: AIService) => {
+    // Check if user is logged in
+    if (!user) {
+      setError('Please log in to purchase services');
+      return;
+    }
+
+    // Check if user has sufficient balance
+    if (balance < service.price) {
+      // Redirect to Paystack payment page
+      const paystackUrl = `https://paystack.com/`;
+      window.open(paystackUrl, '_blank');
+      setError(`Insufficient balance. You need ₦${(service.price - balance).toFixed(2)} more. Opening Paystack to add funds...`);
+      return;
+    }
+
+    // User has sufficient balance, open WhatsApp
+    const whatsappNumber = '+234701334193';
+    const serviceName = service.name;
+    const servicePrice = service.price;
+    const message = encodeURIComponent(
+      `Hi, I want to purchase the "${serviceName}" service for ₦${servicePrice.toFixed(2)}. I have sufficient balance and would like to proceed with the payment.`
+    );
+    const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${message}`;
+    window.open(whatsappUrl, '_blank');
+    setError(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -61,7 +109,7 @@ export const AIServicesPage = () => {
     );
   }
 
-  if (error) {
+  if (error && services.length === 0) {
     return (
       <div className="p-6 rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/10">
         <div className="flex items-start gap-3">
@@ -99,6 +147,35 @@ export const AIServicesPage = () => {
           Explore our collection of AI-powered services
         </p>
       </div>
+
+      {/* Error/Info Banner */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-900/20 flex items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-amber-700 dark:text-amber-300">{error}</p>
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="ml-auto text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+          >
+            ×
+          </button>
+        </motion.div>
+      )}
+
+      {/* User Balance Info */}
+      {user && (
+        <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900">
+          <p className="text-sm text-blue-700 dark:text-blue-300">
+            Your available balance: <span className="font-bold">₦{balance.toFixed(2)}</span>
+          </p>
+        </div>
+      )}
 
       {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -168,8 +245,9 @@ export const AIServicesPage = () => {
                     </p>
                   </div>
                   <button
+                    onClick={() => handlePurchase(service)}
                     className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
-                    title="Add to cart"
+                    title={balance >= service.price ? 'Purchase now' : 'Add funds to purchase'}
                   >
                     <ShoppingCart className="w-6 h-6" />
                   </button>
