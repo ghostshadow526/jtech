@@ -69,7 +69,16 @@ app.get("/api/services", async (req, res) => {
       const category = service.category || "Other";
       if (!acc[category]) acc[category] = [];
       
-      acc[category].push(service);
+      // Apply 20% price markup to the service rate
+      const markupMultiplier = 1.2;
+      const originalRate = parseFloat(service.rate) || 0;
+      const newRate = (originalRate * markupMultiplier).toFixed(4);
+      
+      acc[category].push({
+        ...service,
+        rate: newRate,
+        originalRate: service.rate // Keep original for reference
+      });
       return acc;
     }, {});
 
@@ -126,7 +135,10 @@ app.post("/api/order", async (req, res) => {
       return res.status(404).json({ error: "Service not found" });
     }
 
-    const rate = parseFloat(service.rate);
+    // Apply 20% price markup to the service rate
+    const originalRate = parseFloat(service.rate);
+    const markupMultiplier = 1.2;
+    const rate = originalRate * markupMultiplier;
     const cost = (rate / 1000) * quantity;
 
     // 4. Check user balance
