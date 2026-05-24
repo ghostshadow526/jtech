@@ -7,7 +7,7 @@ import { Bell, Cpu, Megaphone, Rocket, ArrowLeft, ArrowRight, CheckCircle2, Mail
 import { motion, AnimatePresence, useScroll, useMotionValueEvent, useInView } from 'motion/react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { auth, db, googleProvider, signInWithPopup, onAuthStateChanged, User as FirebaseUser, handleFirestoreError, OperationType, signInWithEmailAndPassword, createUserWithEmailAndPassword } from './firebase';
-import { doc, onSnapshot, setDoc, serverTimestamp, collection, query, where, orderBy } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, serverTimestamp, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import axios from 'axios';
 import { Testimonials } from './components/Testimonials';
 import LoginCardSection from './components/ui/login-signup';
@@ -45,6 +45,11 @@ interface SMMService {
   refill: boolean;
   cancel: boolean;
   description?: string;
+  imageUrl?: string;
+  price?: number;
+  email?: string;
+  userId?: string;
+  createdAt?: any;
 }
 
 interface Order {
@@ -144,9 +149,39 @@ export default function App() {
       setServicesError(null);
       try {
         const response = await axios.get('/api/services', { timeout: 60000 });
-        console.log("Services fetched successfully:", response.data);
-        setServices(response.data);
-        const categories = Object.keys(response.data);
+        console.log("SMM Services fetched successfully:", response.data);
+        
+        // Fetch Firestore services with images
+        let merged = { ...response.data };
+        try {
+          const servicesCollection = collection(db, 'services');
+          const querySnapshot = await getDocs(servicesCollection);
+          const firestoreServices: SMMService[] = querySnapshot.docs.map(doc => ({
+            service: doc.id,
+            name: doc.data().name || 'Unnamed Service',
+            imageUrl: doc.data().imageUrl || '',
+            rate: (doc.data().price || 0).toString(),
+            min: '1',
+            max: '999999',
+            category: 'Firestore Services',
+            type: 'custom',
+            dripfeed: false,
+            refill: false,
+            cancel: true,
+            description: doc.data().description || '',
+            ...doc.data()
+          }));
+          
+          if (firestoreServices.length > 0) {
+            merged['Firestore Services'] = firestoreServices;
+            console.log("Firestore services loaded:", firestoreServices);
+          }
+        } catch (firestoreError) {
+          console.warn("Could not fetch Firestore services:", firestoreError);
+        }
+        
+        setServices(merged);
+        const categories = Object.keys(merged);
         console.log("Categories found:", categories);
         if (categories.length > 0) {
           setSelectedCategory(categories[0]);
