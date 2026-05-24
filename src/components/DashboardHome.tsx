@@ -186,7 +186,6 @@ export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProp
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };
