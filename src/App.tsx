@@ -24,12 +24,13 @@ import { SolutionsPage } from './components/SolutionsPage';
 import { ResourcesPage } from './components/ResourcesPage';
 import { AIToolsMarketplace } from './components/AIToolsMarketplace';
 import { AIServicesPage } from './components/AIServicesPage';
+import { CustomerSupportPage } from './components/CustomerSupportPage';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { RegistrationsSection } from './components/admin/RegistrationsSection';
 import { PaymentsSection } from './components/admin/PaymentsSection';
 import { AIToolsSection } from './components/admin/AIToolsSection';
 
-type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'solutions' | 'resources' | 'ai-tools' | 'ai-services' | 'admin';
+type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'solutions' | 'resources' | 'ai-tools' | 'ai-services' | 'customer-support' | 'admin';
 
 interface SMMService {
   service: string;
@@ -868,6 +869,7 @@ export default function App() {
               {view === 'solutions' && <SolutionsPage onBack={() => setView('home')} />}
               {view === 'resources' && <ResourcesPage onBack={() => setView('home')} />}
               {view === 'ai-tools' && <AIToolsMarketplace onBack={() => setView('home')} />}
+              {view === 'customer-support' && <CustomerSupportPage />}
             </AnimatePresence>
           </div>
 

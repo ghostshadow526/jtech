@@ -121,6 +121,14 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Complaints collection - for customer support
+    match /complaints/{document=**} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if false;
+      allow delete: if false;
+    }
+
     // Authenticated users can read and create transactions for payments
     match /transactions/{document=**} {
       allow read: if isAuthenticated();
