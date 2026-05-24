@@ -97,7 +97,7 @@ export const AIServicesPage = () => {
       </div>
 
       {/* Services Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {services.map((service, index) => (
           <motion.div
             key={service.id}
@@ -108,7 +108,7 @@ export const AIServicesPage = () => {
           >
             <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
               {/* Image Container */}
-              <div className="relative w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
+              <div className="relative w-full h-72 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
                 {(service.imageUrl || service.image) ? (
                   <img
                     src={service.imageUrl || service.image}
@@ -132,34 +132,34 @@ export const AIServicesPage = () => {
               </div>
 
               {/* Content Container */}
-              <div className="p-4 space-y-4 flex-1 flex flex-col">
+              <div className="p-6 space-y-5 flex-1 flex flex-col">
                 {/* Name */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
                     {service.name}
                   </h3>
                 </div>
 
                 {/* Description */}
                 {service.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 flex-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 flex-1">
                     {service.description}
                   </p>
                 )}
 
                 {/* Price and Button */}
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">Price</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                       ₦{typeof service.price === 'number' ? service.price.toFixed(2) : service.price}
                     </p>
                   </div>
                   <button
-                    className="p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
+                    className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
                     title="Add to cart"
                   >
-                    <ShoppingCart className="w-5 h-5" />
+                    <ShoppingCart className="w-6 h-6" />
                   </button>
                 </div>
               </div>
