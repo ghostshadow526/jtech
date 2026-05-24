@@ -121,6 +121,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // AI Tools collection
+    match /aiTools/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Complaints collection - for customer support
     match /complaints/{document=**} {
       allow read: if isAdmin();
