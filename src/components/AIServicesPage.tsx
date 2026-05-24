@@ -11,6 +11,10 @@ interface AIService {
   imageUrl?: string;
   image?: string;
   description?: string;
+  duration?: string;
+  email?: string;
+  userId?: string;
+  createdAt?: any;
 }
 
 export const AIServicesPage = () => {
@@ -142,10 +146,26 @@ export const AIServicesPage = () => {
 
                 {/* Description */}
                 {service.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 flex-1">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 flex-1">
                     {service.description}
                   </p>
                 )}
+
+                {/* Duration and Email */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {service.duration && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
+                      <p className="text-gray-500 dark:text-gray-400">Duration</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100">{service.duration}</p>
+                    </div>
+                  )}
+                  {service.email && (
+                    <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
+                      <p className="text-gray-500 dark:text-gray-400">Vendor</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-[10px] truncate">{service.email}</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Price and Button */}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
@@ -162,6 +182,22 @@ export const AIServicesPage = () => {
                     <ShoppingCart className="w-6 h-6" />
                   </button>
                 </div>
+
+                {/* Metadata */}
+                {(service.createdAt || service.userId) && (
+                  <div className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-1 text-[10px] text-gray-400 dark:text-gray-500">
+                    {service.createdAt && (
+                      <p>
+                        Posted: {new Date(service.createdAt.seconds * 1000).toLocaleDateString()}
+                      </p>
+                    )}
+                    {service.userId && (
+                      <p className="truncate" title={service.userId}>
+                        ID: {service.userId.substring(0, 12)}...
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
