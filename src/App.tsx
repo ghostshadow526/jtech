@@ -803,7 +803,7 @@ export default function App() {
           />
         )}
         {activeTab === 'AI Services' && (
-          <AIServicesPage />
+          <AIServicesPage onNavigate={(view) => setActiveTab(view === 'billing' ? 'Add Funds' : view)} />
         )}
         {activeTab === 'Services' && (
           <ServicesView 

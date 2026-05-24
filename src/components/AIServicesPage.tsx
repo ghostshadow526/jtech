@@ -18,7 +18,11 @@ interface AIService {
   createdAt?: any;
 }
 
-export const AIServicesPage = () => {
+interface AIServicesPageProps {
+  onNavigate?: (view: string) => void;
+}
+
+export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
   const [services, setServices] = useState<AIService[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -79,10 +83,9 @@ export const AIServicesPage = () => {
 
     // Check if user has sufficient balance
     if (balance < service.price) {
-      // Redirect to Paystack payment page
-      const paystackUrl = `https://paystack.com/`;
-      window.open(paystackUrl, '_blank');
-      setError(`Insufficient balance. You need ₦${(service.price - balance).toFixed(2)} more. Opening Paystack to add funds...`);
+      setError(`Insufficient balance. You need ₦${(service.price - balance).toFixed(2)} more.`);
+      // Navigate to billing/add funds page
+      onNavigate?.('billing');
       return;
     }
 
