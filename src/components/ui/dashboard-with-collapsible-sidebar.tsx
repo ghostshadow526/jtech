@@ -22,6 +22,7 @@ import {
   LogOut,
   Cpu,
 } from "lucide-react";
+import { NotificationsPanel } from "../NotificationsPanel";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -40,13 +41,21 @@ export const DashboardLayout = ({
   activeTab, 
   setActiveTab 
 }: DashboardLayoutProps) => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark';
+    }
+    return false;
+  });
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, [isDark]);
 
@@ -65,12 +74,18 @@ export const DashboardLayout = ({
             setIsDark={setIsDark} 
             user={user} 
             balance={balance}
+            onNotificationsClick={() => setShowNotifications(true)}
           />
           <main className="flex-1 overflow-auto p-6">
             {children}
           </main>
         </div>
       </div>
+      <NotificationsPanel 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)}
+        userEmail={user?.email}
+      />
     </div>
   );
 };
@@ -187,9 +202,6 @@ const TitleSection = ({ open, user }: any) => {
                   <span className="block text-sm font-semibold text-gray-100 truncate max-w-[120px]">
                     {user?.email?.split('@')[0] || 'User'}
                   </span>
-                  <span className="block text-xs text-gray-400">
-                    Pro Plan
-                  </span>
                 </div>
               </div>
             </div>
@@ -253,7 +265,7 @@ const ToggleClose = ({ open, setOpen }: any) => {
   );
 };
 
-const Header = ({ isDark, setIsDark, user, balance }: any) => {
+const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick }: any) => {
   return (
     <div className="flex items-center justify-between p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div>
@@ -265,13 +277,17 @@ const Header = ({ isDark, setIsDark, user, balance }: any) => {
           <span className="text-xs text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Balance</span>
           <span className="text-lg font-bold text-blue-600 dark:text-blue-400">₦{balance.toFixed(2)}</span>
         </div>
-        <button className="relative p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+        <button 
+          onClick={onNotificationsClick}
+          className="relative p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
           <Bell className="h-5 w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
         </button>
         <button
           onClick={() => setIsDark(!isDark)}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {isDark ? (
             <Sun className="h-4 w-4" />
@@ -279,7 +295,7 @@ const Header = ({ isDark, setIsDark, user, balance }: any) => {
             <Moon className="h-4 w-4" />
           )}
         </button>
-        <button className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+        <button className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
           <User className="h-5 w-5" />
         </button>
       </div>
