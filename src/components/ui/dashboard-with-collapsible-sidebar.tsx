@@ -23,6 +23,7 @@ import {
   Cpu,
 } from "lucide-react";
 import { NotificationsPanel } from "../NotificationsPanel";
+import { UserProfileModal } from "../UserProfileModal";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -49,6 +50,7 @@ export const DashboardLayout = ({
     return false;
   });
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   // Initialize dark mode on mount from localStorage
@@ -97,6 +99,7 @@ export const DashboardLayout = ({
             user={user} 
             balance={balance}
             onNotificationsClick={() => setShowNotifications(true)}
+            onProfileClick={() => setShowProfile(true)}
           />
           <main className="flex-1 overflow-auto p-6">
             {children}
@@ -107,6 +110,12 @@ export const DashboardLayout = ({
         isOpen={showNotifications} 
         onClose={() => setShowNotifications(false)}
         userEmail={user?.email}
+      />
+      <UserProfileModal 
+        isOpen={showProfile} 
+        onClose={() => setShowProfile(false)}
+        user={user}
+        balance={balance}
       />
     </div>
   );
@@ -287,7 +296,7 @@ const ToggleClose = ({ open, setOpen }: any) => {
   );
 };
 
-const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick }: any) => {
+const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick }: any) => {
   return (
     <div className="flex items-center justify-between p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div>
@@ -317,7 +326,10 @@ const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick }: any)
             <Moon className="h-4 w-4" />
           )}
         </button>
-        <button className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
+        <button 
+          onClick={onProfileClick}
+          className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
           <User className="h-5 w-5" />
         </button>
       </div>

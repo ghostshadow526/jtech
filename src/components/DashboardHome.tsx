@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell } from 'lucide-react';
+import { TrendingUp, Users, ShoppingCart, Package, Activity, Bell, Eye, EyeOff } from 'lucide-react';
 import { FeaturedServicesSection } from './FeaturedServicesSection';
 
 interface DashboardHomeProps {
@@ -67,68 +67,80 @@ export const DashboardHome = ({ balance, orders, onNavigate }: DashboardHomeProp
         </div>
       </div>
       
-      {/* Featured Services Section */}
-      <FeaturedServicesSection
-        onViewAllServices={() => onNavigate('services')}
-        onAddToCart={(service) => {
-          console.log('Added to cart:', service);
-          // You can implement add to cart functionality here
-        }}
-      />
+      {/* Orders & Transactions Table */}
+      <div className="space-y-6">
+        {/* Orders Table */}
+        <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Orders History</h3>
+            <button 
+              onClick={() => onNavigate('orders')}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+            >
+              View all
+            </button>
+          </div>
+          
+          {orders.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Order ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Service</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Cost</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                  {orders.slice(0, 10).map((order, i) => (
+                    <tr key={i} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                        #{order.smm_order_id}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {order.service_id}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {order.quantity}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        ₦{order.cost?.toFixed(2) || '0.00'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          order.status === 'completed' 
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                          order.status === 'processing' 
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+                          order.status === 'pending' 
+                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300' :
+                            'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                        }`}>
+                          {order.status?.charAt(0).toUpperCase() + order.status?.slice(1) || 'Unknown'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                        {order.createdAt?.seconds ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="p-12 text-center">
+              <ShoppingCart className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500 dark:text-gray-400">No orders yet. Start ordering to see them here!</p>
+            </div>
+          )}
+        </div>
+      </div>
       
       {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2">
-          <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recent Orders</h3>
-              <button 
-                onClick={() => onNavigate('orders')}
-                className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-              >
-                View all
-              </button>
-            </div>
-            <div className="space-y-4">
-              {recentOrders.length > 0 ? (
-                recentOrders.slice(0, 5).map((order, i) => (
-                  <div key={i} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                    <div className={`p-2 rounded-lg ${
-                      order.status === 'completed' ? 'bg-green-50 dark:bg-green-900/20' :
-                      order.status === 'pending' ? 'bg-blue-50 dark:bg-blue-900/20' :
-                      order.status === 'processing' ? 'bg-purple-50 dark:bg-purple-900/20' :
-                      'bg-red-50 dark:bg-red-900/20'
-                    }`}>
-                      <ShoppingCart className={`h-4 w-4 ${
-                        order.status === 'completed' ? 'text-green-600 dark:text-green-400' :
-                        order.status === 'pending' ? 'text-blue-600 dark:text-blue-400' :
-                        order.status === 'processing' ? 'text-purple-600 dark:text-purple-400' :
-                        'text-red-600 dark:text-red-400'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                        Order #{order.smm_order_id}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        Service ID: {order.service_id} | Qty: {order.quantity}
-                      </p>
-                    </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">
-                      {order.status}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">No orders yet.</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">System Status</h3>
             <div className="space-y-4">
