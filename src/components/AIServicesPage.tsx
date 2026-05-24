@@ -151,21 +151,13 @@ export const AIServicesPage = () => {
                   </p>
                 )}
 
-                {/* Duration and Email */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {service.duration && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded">
-                      <p className="text-gray-500 dark:text-gray-400">Duration</p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100">{service.duration}</p>
-                    </div>
-                  )}
-                  {service.email && (
-                    <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded">
-                      <p className="text-gray-500 dark:text-gray-400">Vendor</p>
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-[10px] truncate">{service.email}</p>
-                    </div>
-                  )}
-                </div>
+                {/* Duration */}
+                {service.duration && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded text-xs">
+                    <p className="text-gray-500 dark:text-gray-400">Duration</p>
+                    <p className="font-semibold text-gray-900 dark:text-gray-100">{service.duration}</p>
+                  </div>
+                )}
 
                 {/* Price and Button */}
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
@@ -184,18 +176,11 @@ export const AIServicesPage = () => {
                 </div>
 
                 {/* Metadata */}
-                {(service.createdAt || service.userId) && (
-                  <div className="pt-3 border-t border-gray-100 dark:border-gray-800 space-y-1 text-[10px] text-gray-400 dark:text-gray-500">
-                    {service.createdAt && (
-                      <p>
-                        Posted: {new Date(service.createdAt.seconds * 1000).toLocaleDateString()}
-                      </p>
-                    )}
-                    {service.userId && (
-                      <p className="truncate" title={service.userId}>
-                        ID: {service.userId.substring(0, 12)}...
-                      </p>
-                    )}
+                {service.createdAt && (
+                  <div className="pt-3 border-t border-gray-100 dark:border-gray-800 text-[10px] text-gray-400 dark:text-gray-500">
+                    <p>
+                      Posted: {new Date(service.createdAt.seconds * 1000).toLocaleDateString()}
+                    </p>
                   </div>
                 )}
               </div>
