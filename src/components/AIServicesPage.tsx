@@ -8,6 +8,7 @@ interface AIService {
   id: string;
   name: string;
   price: number;
+  imageUrl?: string;
   image?: string;
   description?: string;
 }
@@ -108,11 +109,17 @@ export const AIServicesPage = () => {
             <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
               {/* Image Container */}
               <div className="relative w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
-                {service.image ? (
+                {(service.imageUrl || service.image) ? (
                   <img
-                    src={service.image}
+                    src={service.imageUrl || service.image}
                     alt={service.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      console.error('Image failed to load:', service.imageUrl || service.image);
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                    loading="lazy"
+                    crossOrigin="anonymous"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Loader2, ChevronRight, ShoppingCart, AlertCircle } from 'lucide-react';
+import { Search, Loader2, ChevronRight, ShoppingCart } from 'lucide-react';
 
 export function ServiceCard({ service, onOrder, balance }: any) {
   const minQty = parseInt(service.min) || 1;
@@ -8,48 +8,21 @@ export function ServiceCard({ service, onOrder, balance }: any) {
   const [link, setLink] = useState('');
   const [isOrdering, setIsOrdering] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
   const validQuantity = isNaN(quantity) ? minQty : quantity;
   const cost = (parseFloat(service.rate) / 1000) * validQuantity;
   const canAfford = balance >= cost;
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    console.error('Image failed to load:', service.imageUrl);
-    setImageError(true);
-  };
-
   return (
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full">
-      {/* Image Container */}
-      <div className="relative w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden flex items-center justify-center">
-        {service.imageUrl && !imageError ? (
-          <img
-            src={service.imageUrl}
-            alt={service.name}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-            onError={handleImageError}
-            loading="lazy"
-            crossOrigin="anonymous"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <ShoppingCart className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto" />
-              <p className="text-xs text-gray-400">{imageError ? 'Image failed to load' : 'No image available'}</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className="p-8 space-y-6">
+      <div className="p-6 space-y-6">
         <div className="flex justify-between items-start">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span className="text-[10px] font-medium text-gray-500">Service ID: {service.service}</span>
             </div>
-            <h4 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 leading-snug pr-4">{service.name}</h4>
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-snug pr-4">{service.name}</h4>
           </div>
           <div className="text-right">
             <p className="text-[11px] text-gray-500">Rate / 1,000</p>
