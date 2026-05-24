@@ -25,13 +25,14 @@ import { ResourcesPage } from './components/ResourcesPage';
 import { AIToolsMarketplace } from './components/AIToolsMarketplace';
 import { AIServicesPage } from './components/AIServicesPage';
 import { CustomerSupportPage } from './components/CustomerSupportPage';
+import { ComplaintsChatPage } from './components/ComplaintsChatPage';
 import { PriceDebugPage } from './components/PriceDebugPage';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { RegistrationsSection } from './components/admin/RegistrationsSection';
 import { PaymentsSection } from './components/admin/PaymentsSection';
 import { AIToolsSection } from './components/admin/AIToolsSection';
 
-type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'solutions' | 'resources' | 'ai-tools' | 'ai-services' | 'customer-support' | 'price-debug' | 'admin';
+type View = 'home' | 'dashboard' | 'services' | 'orders' | 'profile' | 'auth' | 'billing' | 'settings' | 'help' | 'social-media-boosting' | 'ai-subscriptions' | 'marketing-promotions' | 'products' | 'solutions' | 'resources' | 'ai-tools' | 'ai-services' | 'customer-support' | 'complaints-chat' | 'price-debug' | 'admin';
 
 interface SMMService {
   service: string;
@@ -823,6 +824,7 @@ export default function App() {
           />
         )}
         {activeTab === 'Add Funds' && <AddFundsView />}
+        {activeTab === 'Complaints' && <ComplaintsChatPage />}
         {['settings', 'help'].includes(activeTab) && (
           <div className="flex flex-col items-center justify-center h-96 text-center space-y-4">
             <div className="w-16 h-16 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
@@ -872,6 +874,7 @@ export default function App() {
               {view === 'resources' && <ResourcesPage onBack={() => setView('home')} />}
               {view === 'ai-tools' && <AIToolsMarketplace onBack={() => setView('home')} />}
               {view === 'customer-support' && <CustomerSupportPage />}
+              {view === 'complaints-chat' && <ComplaintsChatPage />}
               {view === 'price-debug' && <PriceDebugPage />}
             </AnimatePresence>
           </div>

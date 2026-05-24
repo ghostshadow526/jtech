@@ -168,6 +168,13 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
           open={open}
         />
         <Option
+          Icon={HelpCircle}
+          title="Complaints"
+          selected={activeTab}
+          setSelected={setActiveTab}
+          open={open}
+        />
+        <Option
           Icon={DollarSign}
           title="Add Funds"
           selected={activeTab}
