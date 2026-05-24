@@ -158,7 +158,7 @@ export const ServicesView = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-8">
           {selectedCategory && services[selectedCategory]
             ?.filter((s: any) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
             .map((service: any) => (
