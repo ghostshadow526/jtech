@@ -17,9 +17,10 @@ import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
 
 interface Message {
-  id: string;
+  id?: string;
   text: string;
-  sender: 'user' | 'admin';
+  sender: 'user' | 'admin' | 'Admin';
+  senderEmail?: string;
   timestamp: any;
 }
 
@@ -230,40 +231,54 @@ export const ComplaintsChatPage = () => {
             </div>
           ) : (
             <div className="space-y-2 p-2">
-              {complaints.map((complaint) => (
-                <motion.button
-                  key={complaint.id}
-                  whileHover={{ scale: 1.02 }}
-                  onClick={() => setSelectedComplaint(complaint)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${
-                    selectedComplaint?.id === complaint.id
-                      ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700'
-                      : 'bg-gray-50 dark:bg-gray-800 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-1">
-                        {complaint.complaint}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {new Date(complaint.createdAt?.seconds * 1000).toLocaleDateString()}
-                      </p>
+              {complaints.map((complaint) => {
+                const lastAdmin = complaint.messages?.slice().reverse().find((m: any) => m.sender === 'admin' || m.sender === 'Admin');
+                return (
+                  <motion.button
+                    key={complaint.id}
+                    whileHover={{ scale: 1.02 }}
+                    onClick={() => setSelectedComplaint(complaint)}
+                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                      selectedComplaint?.id === complaint.id
+                        ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700'
+                        : 'bg-gray-50 dark:bg-gray-800 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-1">
+                          {complaint.complaint}
+                        </p>
+                        {lastAdmin ? (
+                          <p className="text-xs text-green-700 dark:text-green-300 mt-1 line-clamp-1">
+                            Admin: {lastAdmin.text}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {new Date(complaint.createdAt?.seconds * 1000).toLocaleDateString()}
+                          </p>
+                        )}
+                        {lastAdmin && lastAdmin.timestamp && (
+                          <p className="text-2xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            {new Date(lastAdmin.timestamp?.seconds * 1000).toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex-shrink-0">
+                        <span
+                          className={`inline-block w-2 h-2 rounded-full ${
+                            complaint.status === 'resolved'
+                              ? 'bg-green-500'
+                              : complaint.status === 'in-progress'
+                              ? 'bg-yellow-500'
+                              : 'bg-gray-400'
+                          }`}
+                        />
+                      </div>
                     </div>
-                    <div className="flex-shrink-0">
-                      <span
-                        className={`inline-block w-2 h-2 rounded-full ${
-                          complaint.status === 'resolved'
-                            ? 'bg-green-500'
-                            : complaint.status === 'in-progress'
-                            ? 'bg-yellow-500'
-                            : 'bg-gray-400'
-                        }`}
-                      />
-                    </div>
-                  </div>
-                </motion.button>
-              ))}
+                  </motion.button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -322,7 +337,7 @@ export const ComplaintsChatPage = () => {
                 <AnimatePresence>
                   {selectedComplaint.messages.map((msg, idx) => (
                     <motion.div
-                      key={msg.id}
+                      key={idx}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -331,9 +346,15 @@ export const ComplaintsChatPage = () => {
                         className={`max-w-xs lg:max-w-md rounded-lg p-4 ${
                           msg.sender === 'user'
                             ? 'bg-blue-600 text-white rounded-br-none'
-                            : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-bl-none'
+                            : 'bg-green-50 dark:bg-green-900/20 text-gray-900 dark:text-gray-100 border border-green-200 dark:border-green-800 rounded-bl-none'
                         }`}
                       >
+                        {/* Admin Label */}
+                        {(msg.sender === 'admin' || msg.sender === 'Admin') && (
+                          <p className="text-xs font-bold text-green-700 dark:text-green-300 mb-1">
+                            Admin Response {msg.senderEmail && `(${msg.senderEmail})`}
+                          </p>
+                        )}
                         <p className="text-sm">{msg.text}</p>
                         <p
                           className={`text-xs mt-2 ${
@@ -342,9 +363,13 @@ export const ComplaintsChatPage = () => {
                               : 'text-gray-500 dark:text-gray-400'
                           }`}
                         >
-                          {new Date(msg.timestamp?.seconds * 1000).toLocaleTimeString([], {
+                          {new Date(msg.timestamp?.seconds * 1000).toLocaleString([], {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
+                            second: '2-digit'
                           })}
                         </p>
                       </div>
