@@ -52,6 +52,7 @@ export const DashboardLayout = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [pendingComplaintsCount, setPendingComplaintsCount] = useState(0);
 
   // Initialize dark mode on mount from localStorage
   useEffect(() => {
@@ -106,6 +107,7 @@ export const DashboardLayout = ({
             balance={balance}
             onNotificationsClick={() => setShowNotifications(true)}
             onProfileClick={() => setShowProfile(true)}
+            pendingComplaintsCount={pendingComplaintsCount}
           />
           <main className="flex-1 overflow-auto p-6">
             {children}
@@ -116,6 +118,7 @@ export const DashboardLayout = ({
         isOpen={showNotifications} 
         onClose={() => setShowNotifications(false)}
         userEmail={user?.email}
+        onPendingCountChange={setPendingComplaintsCount}
       />
       <UserProfileModal 
         isOpen={showProfile} 
@@ -309,7 +312,7 @@ const ToggleClose = ({ open, setOpen }: any) => {
   );
 };
 
-const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick }: any) => {
+const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick, pendingComplaintsCount = 0 }: any) => {
   return (
     <div className="flex items-center justify-between p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div>
@@ -326,7 +329,11 @@ const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProf
           className="relative p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Bell className="h-5 w-5" />
-          <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+          {pendingComplaintsCount > 0 && (
+            <span className="absolute top-1 right-1 h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+              {pendingComplaintsCount > 9 ? '9+' : pendingComplaintsCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setIsDark(!isDark)}

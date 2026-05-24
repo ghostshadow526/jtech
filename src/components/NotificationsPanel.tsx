@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, AlertCircle, Clock, MessageSquare } from 'lucide-react';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 
 interface Complaint {
@@ -18,28 +18,22 @@ interface NotificationsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   userEmail?: string;
+  onPendingCountChange?: (count: number) => void;
 }
 
-export const NotificationsPanel = ({ isOpen, onClose, userEmail }: NotificationsPanelProps) => {
+export const NotificationsPanel = ({ isOpen, onClose, userEmail, onPendingCountChange }: NotificationsPanelProps) => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isOpen && userEmail) {
-      fetchComplaints();
-    }
-  }, [isOpen, userEmail]);
-
-  const fetchComplaints = async () => {
     if (!userEmail) return;
+
+    setLoading(true);
+    // Set up real-time listener for complaints
+    const complaintsCollection = collection(db, 'complaints');
+    const q = query(complaintsCollection, where('email', '==', userEmail));
     
-    try {
-      setLoading(true);
-      // Fetch complaints for the current user
-      const complaintsCollection = collection(db, 'complaints');
-      const q = query(complaintsCollection, where('email', '==', userEmail));
-      const querySnapshot = await getDocs(q);
-      
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const complaintsData = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -53,12 +47,18 @@ export const NotificationsPanel = ({ isOpen, onClose, userEmail }: Notifications
       });
 
       setComplaints(complaintsData);
-    } catch (error) {
-      console.error('Error fetching complaints:', error);
-    } finally {
+      
+      // Count pending complaints and notify parent
+      const pendingCount = complaintsData.filter(c => c.status === 'pending').length;
+      onPendingCountChange?.(pendingCount);
       setLoading(false);
-    }
-  };
+    }, (error) => {
+      console.error('Error fetching complaints:', error);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [userEmail, onPendingCountChange]);
 
   if (!isOpen) return null;
 
@@ -151,9 +151,19 @@ export const NotificationsPanel = ({ isOpen, onClose, userEmail }: Notifications
 
         {/* Footer */}
         <div className="border-t border-gray-200 dark:border-gray-800 p-4 text-center">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Total complaints: {complaints.length}
-          </p>
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Total complaints: {complaints.length}
+            </p>
+            <div className="flex items-center justify-center gap-4 text-xs">
+              <span className="text-yellow-600 dark:text-yellow-400">
+                Pending: {complaints.filter(c => c.status === 'pending').length}
+              </span>
+              <span className="text-green-600 dark:text-green-400">
+                Resolved: {complaints.filter(c => c.status === 'resolved').length}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </>
