@@ -43,13 +43,31 @@ export const DashboardLayout = ({
 }: DashboardLayoutProps) => {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark';
+      const saved = localStorage.getItem('theme');
+      return saved === 'dark';
     }
     return false;
   });
   const [showNotifications, setShowNotifications] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
+  // Initialize dark mode on mount from localStorage
   useEffect(() => {
+    setMounted(true);
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      setIsDark(false);
+    }
+  }, []);
+
+  // Update dark mode when state changes
+  useEffect(() => {
+    if (!mounted) return;
+    
     if (isDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -57,10 +75,14 @@ export const DashboardLayout = ({
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, [isDark]);
+  }, [isDark, mounted]);
+
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <div className={`flex min-h-screen w-full ${isDark ? 'dark' : ''}`}>
+    <div className="flex min-h-screen w-full">
       <div className="flex w-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <Sidebar 
           activeTab={activeTab} 
