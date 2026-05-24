@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Loader2, AlertCircle, MessageCircle, CheckCircle } from 'lucide-react';
+import { Send, Loader2, AlertCircle, MessageCircle, CheckCircle, Plus } from 'lucide-react';
 import { 
   collection, 
   addDoc, 
@@ -40,6 +40,13 @@ export const ComplaintsChatPage = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSubmitForm, setShowSubmitForm] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    complaint: ''
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const auth = getAuth();
   const user = auth.currentUser;
@@ -122,6 +129,43 @@ export const ComplaintsChatPage = () => {
     }
   };
 
+  const handleSubmitComplaint = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.name.trim() || !formData.complaint.trim() || !user?.email) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+
+      const complaintsCollection = collection(db, 'complaints');
+      await addDoc(complaintsCollection, {
+        name: formData.name,
+        email: user.email,
+        complaint: formData.complaint,
+        createdAt: serverTimestamp(),
+        status: 'pending',
+        messages: []
+      });
+
+      setFormData({ name: '', complaint: '' });
+      setSubmitSuccess(true);
+      setError(null);
+
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        setShowSubmitForm(false);
+      }, 2000);
+    } catch (err: any) {
+      console.error('Error submitting complaint:', err);
+      setError(err.message || 'Failed to submit complaint');
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <motion.div
@@ -160,11 +204,22 @@ export const ComplaintsChatPage = () => {
     >
       {/* Complaints List */}
       <div className="w-full md:w-80 flex flex-col bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Complaints</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {complaints.length} {complaints.length === 1 ? 'complaint' : 'complaints'}
-          </p>
+        <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+          <div className="flex-1">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Complaints</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {complaints.length} {complaints.length === 1 ? 'complaint' : 'complaints'}
+            </p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSubmitForm(true)}
+            className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            title="Submit new complaint"
+          >
+            <Plus className="w-5 h-5" />
+          </motion.button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -347,6 +402,139 @@ export const ComplaintsChatPage = () => {
           </div>
         )}
       </div>
+
+      {/* Submit Complaint Modal */}
+      <AnimatePresence>
+        {showSubmitForm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => setShowSubmitForm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 space-y-6"
+            >
+              {/* Header */}
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Submit a Complaint
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Tell us what's wrong. We'll look into it as soon as possible.
+                </p>
+              </div>
+
+              {submitSuccess ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="flex flex-col items-center justify-center py-12"
+                >
+                  <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 text-center">
+                    Complaint submitted successfully!
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2">
+                    We'll review it shortly
+                  </p>
+                </motion.div>
+              ) : (
+                <form onSubmit={handleSubmitComplaint} className="space-y-4">
+                  {/* Name Input */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Your name"
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      disabled={submitLoading}
+                    />
+                  </div>
+
+                  {/* Email Display */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={user?.email || ''}
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                      disabled
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Your email is auto-filled and will be used to contact you
+                    </p>
+                  </div>
+
+                  {/* Complaint Textarea */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Complaint Details
+                    </label>
+                    <textarea
+                      value={formData.complaint}
+                      onChange={(e) => setFormData({ ...formData, complaint: e.target.value })}
+                      placeholder="Describe your issue in detail..."
+                      rows={5}
+                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+                      disabled={submitLoading}
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900 rounded-lg flex items-center gap-2"
+                    >
+                      <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+                      <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                    </motion.div>
+                  )}
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowSubmitForm(false)}
+                      className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      disabled={submitLoading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitLoading || !formData.name.trim() || !formData.complaint.trim()}
+                      className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      {submitLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Submit Complaint
+                    </button>
+                  </div>
+                </form>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
