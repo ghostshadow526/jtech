@@ -53,6 +53,7 @@ export const DashboardLayout = ({
   const [showProfile, setShowProfile] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [pendingCustomerCareCount, setPendingCustomerCareCount] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Initialize dark mode on mount from localStorage
   useEffect(() => {
@@ -98,6 +99,8 @@ export const DashboardLayout = ({
           setActiveTab={setActiveTab} 
           user={user} 
           onLogout={onLogout}
+          open={sidebarOpen}
+          setOpen={setSidebarOpen}
         />
         <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
           <Header 
@@ -108,6 +111,7 @@ export const DashboardLayout = ({
             onNotificationsClick={() => setShowNotifications(true)}
             onProfileClick={() => setShowProfile(true)}
             pendingCustomerCareCount={pendingCustomerCareCount}
+            onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
           />
           <main className="flex-1 overflow-auto p-6">
             {children}
@@ -130,9 +134,7 @@ export const DashboardLayout = ({
   );
 };
 
-const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
-  const [open, setOpen] = useState(true);
-
+const Sidebar = ({ activeTab, setActiveTab, user, onLogout, open, setOpen }: any) => {
   return (
     <nav
       className={`sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out ${
@@ -295,12 +297,21 @@ const Logo = () => {
   );
 };
 
-const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick, pendingCustomerCareCount = 0 }: any) => {
+const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick, pendingCustomerCareCount = 0, onSidebarToggle }: any) => {
   return (
     <div className="flex items-center justify-between p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, {user?.email}</p>
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onSidebarToggle}
+          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          title="Toggle sidebar"
+        >
+          <ChevronsRight className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+        </button>
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Dashboard</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Welcome back, {user?.email}</p>
+        </div>
       </div>
       <div className="flex items-center gap-4">
         <div className="hidden md:flex flex-col items-end mr-4">

@@ -11,7 +11,8 @@ import {
   orderBy,
   doc,
   updateDoc,
-  arrayUnion
+  arrayUnion,
+  getDoc
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
@@ -54,30 +55,40 @@ export const CustomerCareChatPage = () => {
   const user = auth.currentUser;
 
   const handleRefresh = async () => {
-    if (!user?.email) return;
+    if (!selectedTicket) return;
     
     try {
       setIsRefreshing(true);
-      // Re-fetch the tickets
-      const ticketsCollection = collection(db, 'customer_care');
-      const q = query(ticketsCollection, where('email', '==', user.email), orderBy('createdAt', 'desc'));
+      // Re-fetch the specific ticket to get latest messages
+      const ticketRef = doc(db, 'customer_care', selectedTicket.id);
       
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const fetchedTickets = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          name: doc.data().name || '',
-          email: doc.data().email || '',
-          issue: doc.data().issue || '',
-          messages: doc.data().messages || [],
-          createdAt: doc.data().createdAt,
-          status: doc.data().status || 'pending'
-        }));
+      // Wait a moment then fetch
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const docSnap = await getDoc(ticketRef);
+      if (docSnap.exists()) {
+        const updatedTicket: CustomerCareTicket = {
+          id: docSnap.id,
+          name: docSnap.data().name || '',
+          email: docSnap.data().email || '',
+          issue: docSnap.data().issue || '',
+          messages: docSnap.data().messages || [],
+          createdAt: docSnap.data().createdAt,
+          status: docSnap.data().status || 'pending'
+        };
         
-        setCustomerCareTickets(fetchedTickets);
-        unsubscribe();
-      });
+        // Update the selected ticket
+        setSelectedTicket(updatedTicket);
+        
+        // Update in the tickets list
+        setCustomerCareTickets(prev => 
+          prev.map(ticket => 
+            ticket.id === updatedTicket.id ? updatedTicket : ticket
+          )
+        );
+      }
     } catch (err: any) {
-      console.error('Error refreshing tickets:', err);
+      console.error('Error refreshing chat:', err);
     } finally {
       setIsRefreshing(false);
     }
