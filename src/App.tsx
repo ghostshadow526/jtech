@@ -254,22 +254,24 @@ export default function App() {
     }
   };
 
-  const Logo = ({ className = "", showText = false }: { className?: string, showText?: boolean }) => (
+  const Logo = ({ className = "", showText = false, showImage = true }: { className?: string, showText?: boolean, showImage?: boolean }) => (
     <motion.div 
       layoutId="main-logo"
       transition={{ type: 'spring', stiffness: 260, damping: 30 }}
       className={`flex items-center gap-2 group cursor-pointer ${className}`}
       onClick={() => setView('home')}
     >
-      <div className="w-8 h-8 relative">
-        <div className="absolute inset-0 bg-slate-900/5 blur-2xl rounded-full group-hover:bg-slate-900/10 transition-all duration-500" />
-        <img 
-          src="https://raw.githubusercontent.com/ghostshadow526/jtech/main/logo.png%20(4).png" 
-          alt="JT Technologies Logo" 
-          className="w-full h-full object-contain relative z-10"
-          referrerPolicy="no-referrer"
-        />
-      </div>
+      {showImage && (
+        <div className="w-8 h-8 relative">
+          <div className="absolute inset-0 bg-slate-900/5 blur-2xl rounded-full group-hover:bg-slate-900/10 transition-all duration-500" />
+          <img 
+            src="https://raw.githubusercontent.com/ghostshadow526/jtech/main/logo.png%20(4).png" 
+            alt="JT Technologies Logo" 
+            className="w-full h-full object-contain relative z-10"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      )}
       {showText && (
         <span className="text-lg font-bold text-brand-950 tracking-tight">JT Tech</span>
       )}
@@ -280,7 +282,7 @@ export default function App() {
     <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-brand-100 py-3' : 'bg-transparent py-5'}`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Logo showText={true} />
+          <Logo showText={true} showImage={false} />
           <div className="hidden lg:flex items-center gap-6">
             {[
               { name: 'Product', view: 'products' },
