@@ -1,0 +1,14 @@
+node_modules
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.*.local
+.ts
+public
+src/**/*.test.ts
+src/**/*.test.tsx
+firestore.rules
+firebase-blueprint.json
+firebase-applet-config.json
