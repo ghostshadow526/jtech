@@ -299,7 +299,7 @@ export default function App() {
           <div className="w-px h-4 bg-brand-200 hidden sm:block" />
           <button onClick={() => navigateToAuth('login')} className="text-sm font-medium text-brand-600 hover:text-brand-950 transition-colors">Log in</button>
           <button onClick={() => navigateToAuth('signup')} className="bg-brand-950 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-800 transition-all">
-            Get JT Tech free
+            Get Started
           </button>
         </div>
       </div>
