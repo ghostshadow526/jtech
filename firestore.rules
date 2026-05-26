@@ -73,6 +73,14 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && isCompleted(resource.data);
     }
 
+    // Customer Care collection
+    match /customer_care/{ticketId} {
+      allow read: if isAuthenticated() && (resource.data.email == request.auth.email || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (resource.data.email == request.auth.email || isAdmin());
+      allow delete: if isAdmin();
+    }
+
     // Transactions collection
     match /transactions/{document=**} {
       allow read: if isAuthenticated();
