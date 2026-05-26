@@ -98,14 +98,14 @@ export const DashboardHome = ({ balance, orders, onNavigate, user, onPlaceOrder 
           <p className="text-sm text-green-600 dark:text-green-400 mt-1">Available for orders</p>
         </div>
         
-        <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => onNavigate('services')}>
+        <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => onNavigate('Boost Your Socials')}>
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
               <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </div>
-          <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-1">Services</h3>
+          <h3 className="font-medium text-gray-600 dark:text-gray-400 mb-1">Boost Your Socials</h3>
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">Browse</p>
           <p className="text-sm text-green-600 dark:text-green-400 mt-1">Available to order</p>
         </div>
@@ -230,7 +230,7 @@ export const DashboardHome = ({ balance, orders, onNavigate, user, onPlaceOrder 
       {/* Featured Services Section */}
       <div className="py-8">
         <FeaturedServicesSection 
-          onViewAllServices={() => onNavigate('services')}
+          onViewAllServices={() => onNavigate('Boost Your Socials')}
           onAddToCart={handleAddToCart}
         />
       </div>

@@ -805,7 +805,7 @@ export default function App() {
         {activeTab === 'AI Services' && (
           <AIServicesPage onNavigate={(view) => setActiveTab(view === 'billing' ? 'Add Funds' : view)} />
         )}
-        {activeTab === 'Services' && (
+        {activeTab === 'Boost Your Socials' && (
           <ServicesView 
             servicesLoading={servicesLoading}
             servicesError={servicesError}

@@ -158,7 +158,7 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
         />
         <Option
           Icon={ShoppingCart}
-          title="Services"
+          title="Boost Your Socials"
           selected={activeTab}
           setSelected={setActiveTab}
           open={open}
