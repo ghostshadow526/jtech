@@ -329,9 +329,9 @@ const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProf
           className="relative p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
         >
           <Bell className="h-5 w-5" />
-          {pendingComplaintsCount > 0 && (
+          {pendingCustomerCareCount > 0 && (
             <span className="absolute top-1 right-1 h-5 w-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
-              {pendingComplaintsCount > 9 ? '9+' : pendingComplaintsCount}
+              {pendingCustomerCareCount > 9 ? '9+' : pendingCustomerCareCount}
             </span>
           )}
         </button>
