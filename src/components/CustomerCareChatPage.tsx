@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Loader2, AlertCircle, MessageCircle, CheckCircle, Plus } from 'lucide-react';
+import { Send, Loader2, AlertCircle, MessageCircle, CheckCircle, Plus, Clock, Zap } from 'lucide-react';
 import { 
   collection, 
   addDoc, 
@@ -51,6 +51,29 @@ export const CustomerCareChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const auth = getAuth();
   const user = auth.currentUser;
+
+  // Helper function to check if ticket is recent (within last 24 hours)
+  const isRecentTicket = (createdAt: any) => {
+    if (!createdAt?.seconds) return false;
+    const ticketDate = new Date(createdAt.seconds * 1000);
+    const now = new Date();
+    const hoursAgo = (now.getTime() - ticketDate.getTime()) / (1000 * 60 * 60);
+    return hoursAgo < 24;
+  };
+
+  // Helper function to format time difference
+  const getRelativeTime = (timestamp: any) => {
+    if (!timestamp?.seconds) return 'Unknown';
+    const date = new Date(timestamp.seconds * 1000);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  };
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -207,8 +230,11 @@ export const CustomerCareChatPage = () => {
       <div className="w-full md:w-80 flex flex-col bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Tickets</h2>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Tickets</h2>
+              <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {customerCareTickets.length} {customerCareTickets.length === 1 ? 'ticket' : 'tickets'}
             </p>
           </div>
@@ -228,52 +254,67 @@ export const CustomerCareChatPage = () => {
             <div className="p-4 text-center text-gray-500 dark:text-gray-400">
               <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No tickets yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Submit your first ticket using the + button</p>
             </div>
           ) : (
             <div className="space-y-2 p-2">
-              {customerCareTickets.map((ticket) => {
+              {customerCareTickets.map((ticket, index) => {
                 const lastAdmin = ticket.messages?.slice().reverse().find((m: any) => m.sender === 'admin' || m.sender === 'Admin');
+                const isRecent = isRecentTicket(ticket.createdAt);
+                const relativeTime = getRelativeTime(ticket.createdAt);
+                
                 return (
                   <motion.button
                     key={ticket.id}
                     whileHover={{ scale: 1.02 }}
                     onClick={() => setSelectedTicket(ticket)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    className={`w-full text-left p-3 rounded-lg transition-colors relative overflow-hidden ${
                       selectedTicket?.id === ticket.id
                         ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700'
                         : 'bg-gray-50 dark:bg-gray-800 border border-transparent hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
+                    {/* Recent Badge */}
+                    {isRecent && index === 0 && (
+                      <div className="absolute top-0 right-0 bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        RECENT
+                      </div>
+                    )}
+                    
+                    <div className="flex items-start justify-between gap-2 pr-12">
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm line-clamp-1">
                           {ticket.issue}
                         </p>
                         {lastAdmin ? (
                           <p className="text-xs text-green-700 dark:text-green-300 mt-1 line-clamp-1">
-                            Admin: {lastAdmin.text}
+                            ✓ Admin: {lastAdmin.text}
                           </p>
                         ) : (
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            {new Date(ticket.createdAt?.seconds * 1000).toLocaleDateString()}
+                            {relativeTime}
                           </p>
                         )}
                         {lastAdmin && lastAdmin.timestamp && (
-                          <p className="text-2xs text-gray-400 dark:text-gray-500 mt-0.5">
-                            {new Date(lastAdmin.timestamp?.seconds * 1000).toLocaleString()}
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            Response: {getRelativeTime(lastAdmin.timestamp)}
                           </p>
                         )}
                       </div>
-                      <div className="flex-shrink-0">
+                      <div className="flex-shrink-0 flex flex-col items-end gap-1">
                         <span
                           className={`inline-block w-2 h-2 rounded-full ${
                             ticket.status === 'resolved'
                               ? 'bg-green-500'
                               : ticket.status === 'in-progress'
                               ? 'bg-yellow-500'
-                              : 'bg-gray-400'
+                              : 'bg-red-400'
                           }`}
                         />
+                        {isRecent && (
+                          <span className="text-xs px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded">New</span>
+                        )}
                       </div>
                     </div>
                   </motion.button>
