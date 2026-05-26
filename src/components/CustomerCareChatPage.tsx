@@ -135,7 +135,10 @@ export const CustomerCareChatPage = () => {
         id: Date.now().toString(),
         text: newMessage,
         sender: 'user',
-        timestamp: serverTimestamp()
+        timestamp: {
+          seconds: Math.floor(Date.now() / 1000),
+          nanoseconds: 0
+        }
       };
 
       await updateDoc(ticketRef, {
