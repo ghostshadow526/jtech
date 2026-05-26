@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cpu, Loader2, AlertCircle, ShoppingCart } from 'lucide-react';
-import { collection, getDocs, query, doc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, query, doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
 
@@ -28,6 +28,7 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [selectedService, setSelectedService] = useState<AIService | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
 
@@ -74,31 +75,37 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
     fetchServices();
   }, []);
 
-  const handlePurchase = (service: AIService) => {
-    // Check if user is logged in
+  const handlePurchase = async (service: AIService) => {
     if (!user) {
       setError('Please log in to purchase services');
       return;
     }
 
-    // Check if user has sufficient balance
     if (balance < service.price) {
-      setError(`Insufficient balance. You need ₦${(service.price - balance).toFixed(2)} more.`);
-      // Navigate to billing/add funds page
-      onNavigate?.('billing');
+      setError('please top up your acct');
       return;
     }
 
-    // User has sufficient balance, open WhatsApp
-    const whatsappNumber = '+234701334193';
-    const serviceName = service.name;
-    const servicePrice = service.price;
-    const message = encodeURIComponent(
-      `Hi, I want to purchase the "${serviceName}" service for ₦${servicePrice.toFixed(2)}. I have sufficient balance and would like to proceed with the payment.`
-    );
-    const whatsappUrl = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-    setError(null);
+    setIsProcessing(true);
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      await updateDoc(userDocRef, {
+        balance: increment(-service.price),
+      });
+
+      const message = encodeURIComponent(
+        `Hello, I have made payment for the ${service.name} AI tool.`
+      );
+      const whatsappUrl = `https://wa.me/2347013341935?text=${message}`;
+      window.location.href = whatsappUrl;
+
+      setError(null);
+    } catch (err: any) {
+      setError(`Error processing purchase: ${err.message}`);
+      console.error('Purchase error:', err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (loading) {
@@ -249,10 +256,15 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
                   </div>
                   <button
                     onClick={() => handlePurchase(service)}
-                    className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
+                    disabled={isProcessing}
+                    className="p-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors duration-200 flex items-center justify-center"
                     title={balance >= service.price ? 'Purchase now' : 'Add funds to purchase'}
                   >
-                    <ShoppingCart className="w-6 h-6" />
+                    {isProcessing ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <ShoppingCart className="w-6 h-6" />
+                    )}
                   </button>
                 </div>
 

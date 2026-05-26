@@ -52,7 +52,7 @@ export const DashboardLayout = ({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [pendingComplaintsCount, setPendingComplaintsCount] = useState(0);
+  const [pendingCustomerCareCount, setPendingCustomerCareCount] = useState(0);
 
   // Initialize dark mode on mount from localStorage
   useEffect(() => {
@@ -107,7 +107,7 @@ export const DashboardLayout = ({
             balance={balance}
             onNotificationsClick={() => setShowNotifications(true)}
             onProfileClick={() => setShowProfile(true)}
-            pendingComplaintsCount={pendingComplaintsCount}
+            pendingCustomerCareCount={pendingCustomerCareCount}
           />
           <main className="flex-1 overflow-auto p-6">
             {children}
@@ -118,7 +118,7 @@ export const DashboardLayout = ({
         isOpen={showNotifications} 
         onClose={() => setShowNotifications(false)}
         userEmail={user?.email}
-        onPendingCountChange={setPendingComplaintsCount}
+        onPendingCountChange={setPendingCustomerCareCount}
       />
       <UserProfileModal 
         isOpen={showProfile} 
@@ -172,7 +172,7 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
         />
         <Option
           Icon={HelpCircle}
-          title="Complaints"
+          title="Customer Care"
           selected={activeTab}
           setSelected={setActiveTab}
           open={open}
@@ -312,7 +312,7 @@ const ToggleClose = ({ open, setOpen }: any) => {
   );
 };
 
-const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick, pendingComplaintsCount = 0 }: any) => {
+const Header = ({ isDark, setIsDark, user, balance, onNotificationsClick, onProfileClick, pendingCustomerCareCount = 0 }: any) => {
   return (
     <div className="flex items-center justify-between p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <div>

@@ -7,14 +7,14 @@ import { db } from '../firebase';
 interface FormData {
   name: string;
   email: string;
-  complaint: string;
+  issue: string;
 }
 
 export const CustomerSupportPage = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
-    complaint: ''
+    issue: ''
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -31,7 +31,7 @@ export const CustomerSupportPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || !formData.email.trim() || !formData.complaint.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.issue.trim()) {
       setError('Please fill in all fields');
       return;
     }
@@ -47,12 +47,12 @@ export const CustomerSupportPage = () => {
       setLoading(true);
       setError(null);
 
-      // Add complaint to Firestore
-      const complaintsCollection = collection(db, 'complaints');
-      await addDoc(complaintsCollection, {
+      // Add issue to Firestore
+      const customerCareCollection = collection(db, 'customer_care');
+      await addDoc(customerCareCollection, {
         name: formData.name,
         email: formData.email,
-        complaint: formData.complaint,
+        issue: formData.issue,
         createdAt: serverTimestamp(),
         status: 'pending'
       });
@@ -61,7 +61,7 @@ export const CustomerSupportPage = () => {
       setFormData({
         name: '',
         email: '',
-        complaint: ''
+        issue: ''
       });
 
       // Reset success message after 5 seconds
@@ -69,8 +69,8 @@ export const CustomerSupportPage = () => {
         setSuccess(false);
       }, 5000);
     } catch (err: any) {
-      console.error('Error submitting complaint:', err);
-      setError(err.message || 'Failed to submit complaint. Please try again.');
+      console.error('Error submitting issue:', err);
+      setError(err.message || 'Failed to submit issue. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ export const CustomerSupportPage = () => {
           Customer Support
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          We'd love to hear from you. Please share your concerns or complaints below.
+          We'd love to hear from you. Please share your concerns or issues below.
         </p>
       </div>
 
@@ -105,7 +105,7 @@ export const CustomerSupportPage = () => {
           <div>
             <h3 className="font-semibold text-green-900 dark:text-green-200">Successfully submitted!</h3>
             <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-              Thank you for your feedback. We'll review your complaint and get back to you soon.
+              Thank you for your feedback. We'll review your message and get back to you soon.
             </p>
           </div>
         </motion.div>
@@ -162,17 +162,17 @@ export const CustomerSupportPage = () => {
           />
         </div>
 
-        {/* Complaint Field */}
+        {/* Issue Field */}
         <div className="space-y-2">
-          <label htmlFor="complaint" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            Your Complaint
+          <label htmlFor="issue" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Your Message
           </label>
           <textarea
-            id="complaint"
-            name="complaint"
-            value={formData.complaint}
+            id="issue"
+            name="issue"
+            value={formData.issue}
             onChange={handleChange}
-            placeholder="Please describe your issue or complaint in detail..."
+            placeholder="Please describe your issue or feedback in detail..."
             rows={6}
             className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition resize-none"
             disabled={loading}
@@ -193,7 +193,7 @@ export const CustomerSupportPage = () => {
           ) : (
             <>
               <Send className="w-5 h-5" />
-              Submit Complaint
+              Submit Message
             </>
           )}
         </button>
@@ -202,7 +202,7 @@ export const CustomerSupportPage = () => {
       {/* Info Box */}
       <div className="mt-8 p-6 rounded-lg border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-900/10">
         <p className="text-sm text-blue-900 dark:text-blue-200">
-          <span className="font-semibold">Note:</span> We take all complaints seriously and will review your feedback within 24-48 hours. We may contact you via the email provided for more details if needed.
+          <span className="font-semibold">Note:</span> We take all feedback seriously and will review your message within 24-48 hours. We may contact you via the email provided for more details if needed.
         </p>
       </div>
     </motion.div>

@@ -127,8 +127,8 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Complaints collection - for customer support
-    match /complaints/{document=**} {
+    // Customer Care collection - for customer support
+    match /customer_care/{document=**} {
       allow read: if isAdmin();
       allow create: if isAuthenticated();
       allow update: if false;
