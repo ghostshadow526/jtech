@@ -1,5 +1,6 @@
-import { ArrowLeft, Rocket, CheckCircle2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Rocket, CheckCircle2, ArrowRight, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useState } from 'react';
 
 interface SocialMediaBoostingPageProps {
   onBack: () => void;
@@ -7,6 +8,13 @@ interface SocialMediaBoostingPageProps {
 }
 
 export function SocialMediaBoostingPage({ onBack, onNavigateToAuth }: SocialMediaBoostingPageProps) {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
+
   return (
     <div className="w-full">
       {/* Header */}
@@ -22,7 +30,14 @@ export function SocialMediaBoostingPage({ onBack, onNavigateToAuth }: SocialMedi
             </div>
             <span className="text-lg font-bold text-brand-950">Social Media Boosting</span>
           </div>
-          <div className="w-20" />
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 text-brand-600 hover:text-brand-950 transition-colors font-medium disabled:opacity-50"
+            title="Refresh page"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 

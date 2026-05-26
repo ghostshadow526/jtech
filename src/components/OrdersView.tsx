@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
 
 interface OrdersViewProps {
   orders: any[];
   onBack: () => void;
 }
 
-export const OrdersView = ({ orders, onBack }: OrdersViewProps) => (
-  <motion.div 
+export const OrdersView = ({ orders, onBack }: OrdersViewProps) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
+
+  return ( 
     initial={{ opacity: 0, x: -20 }}
     animate={{ opacity: 1, x: 0 }}
     className="w-full space-y-8"
@@ -21,6 +28,14 @@ export const OrdersView = ({ orders, onBack }: OrdersViewProps) => (
         </button>
         <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Operation Logs</h2>
       </div>
+      <button
+        onClick={handleRefresh}
+        disabled={isRefreshing}
+        className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50"
+        title="Refresh page"
+      >
+        <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+      </button>
     </div>
 
     <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
@@ -70,4 +85,5 @@ export const OrdersView = ({ orders, onBack }: OrdersViewProps) => (
       </div>
     </div>
   </motion.div>
-);
+  );
+};

@@ -1,4 +1,4 @@
-import { ArrowLeft, ShoppingCart, Star } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Star, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -21,8 +21,14 @@ interface AIToolsMarketplaceProps {
 export function AIToolsMarketplace({ onBack }: AIToolsMarketplaceProps) {
   const [tools, setTools] = useState<AITool[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -67,7 +73,14 @@ export function AIToolsMarketplace({ onBack }: AIToolsMarketplaceProps) {
             Back
           </button>
           <span className="text-lg font-bold text-brand-950">AI Tools Marketplace</span>
-          <div className="w-20" />
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 text-brand-600 hover:text-brand-950 transition-colors font-medium disabled:opacity-50"
+            title="Refresh page"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Wallet, CreditCard, ArrowRight, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Wallet, CreditCard, ArrowRight, Loader2, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { auth, db } from '../firebase';
 import { doc, updateDoc, increment } from 'firebase/firestore';
 
@@ -14,9 +14,15 @@ export const AddFundsView = () => {
   const [selectedAmount, setSelectedAmount] = useState<number>(5000);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [paystackLoaded, setPaystackLoaded] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   const predefinedAmounts = [5000, 10000, 25000, 50000, 100000];
   const PAYSTACK_PUBLIC_KEY = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_live_cf2748615538818ad7b36689672b5c05ea2caaac';
