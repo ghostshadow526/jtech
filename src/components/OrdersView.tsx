@@ -16,10 +16,11 @@ export const OrdersView = ({ orders, onBack }: OrdersViewProps) => {
   };
 
   return ( 
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-    className="w-full space-y-8"
-  >
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="w-full space-y-8"
+    >
     <div className="flex justify-between items-center">
       <div>
         <button onClick={onBack} className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors mb-4">
