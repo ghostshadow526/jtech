@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 
 export const PriceDebugPage = () => {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -62,6 +68,18 @@ export const PriceDebugPage = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Price Debug</h1>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 p-2"
+          title="Refresh page"
+        >
+          <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </button>
+      </div>
+
       <div className="p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-900">
         <div className="flex items-center gap-3 mb-2">
           <CheckCircle className="h-5 w-5 text-blue-600" />

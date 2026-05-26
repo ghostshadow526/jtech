@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cpu, Loader2, AlertCircle, ShoppingCart } from 'lucide-react';
+import { Cpu, Loader2, AlertCircle, ShoppingCart, RefreshCw } from 'lucide-react';
 import { collection, getDocs, query, doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
@@ -25,12 +25,18 @@ interface AIServicesPageProps {
 export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
   const [services, setServices] = useState<AIService[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [selectedService, setSelectedService] = useState<AIService | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const auth = getAuth();
   const user = auth.currentUser;
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   // Fetch user balance
   useEffect(() => {
@@ -149,13 +155,23 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
       className="w-full space-y-8"
     >
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-          AI Tools Services
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Explore our collection of AI-powered services
-        </p>
+      <div className="flex justify-between items-start">
+        <div className="space-y-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+            AI Tools Services
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Explore our collection of AI-powered services
+          </p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 p-2"
+          title="Refresh page"
+        >
+          <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       {/* Error/Info Banner */}

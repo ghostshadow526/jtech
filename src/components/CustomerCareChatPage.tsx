@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, Loader2, AlertCircle, MessageCircle, CheckCircle, Plus, Clock, Zap } from 'lucide-react';
+import { Send, Loader2, AlertCircle, MessageCircle, CheckCircle, Plus, Clock, Zap, RefreshCw } from 'lucide-react';
 import { 
   collection, 
   addDoc, 
@@ -40,6 +40,7 @@ export const CustomerCareChatPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -51,6 +52,11 @@ export const CustomerCareChatPage = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const auth = getAuth();
   const user = auth.currentUser;
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   // Helper function to check if ticket is recent (within last 24 hours)
   const isRecentTicket = (createdAt: any) => {
@@ -241,15 +247,27 @@ export const CustomerCareChatPage = () => {
               {customerCareTickets.length} {customerCareTickets.length === 1 ? 'ticket' : 'tickets'}
             </p>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowSubmitForm(true)}
-            className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            title="Submit new ticket"
-          >
-            <Plus className="w-5 h-5" />
-          </motion.button>
+          <div className="flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+              title="Refresh tickets"
+            >
+              <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowSubmitForm(true)}
+              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              title="Submit new ticket"
+            >
+              <Plus className="w-5 h-5" />
+            </motion.button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto">

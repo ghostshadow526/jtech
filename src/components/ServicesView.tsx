@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Search, Loader2, AlertCircle, Grid3X3, ChevronDown } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Grid3X3, ChevronDown, RefreshCw } from 'lucide-react';
 import { ServiceCard } from './ServiceCard';
 
 interface ServicesViewProps {
@@ -27,7 +27,13 @@ export const ServicesView = ({
   balance
 }: ServicesViewProps) => {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -101,15 +107,25 @@ export const ServicesView = ({
             <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md">Browse services by category, filter with search, and place orders in a few clicks.</p>
           </div>
         </div>
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="Search capabilities (e.g. Instagram, Followers)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-          />
+        <div className="flex gap-4 w-full md:w-auto">
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 p-2 md:w-auto"
+            title="Refresh page"
+          >
+            <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+          <div className="relative flex-1 md:flex-none md:w-96">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Search capabilities (e.g. Instagram, Followers)..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-12 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-11 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            />
+          </div>
         </div>
       </div>
 

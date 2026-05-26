@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Send, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { Send, AlertCircle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -17,8 +17,14 @@ export const CustomerSupportPage = () => {
     issue: ''
   });
   const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    window.location.reload();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -84,13 +90,23 @@ export const CustomerSupportPage = () => {
       className="w-full max-w-2xl mx-auto py-12 px-4"
     >
       {/* Header */}
-      <div className="space-y-2 mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
-          Customer Support
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          We'd love to hear from you. Please share your concerns or issues below.
-        </p>
+      <div className="space-y-2 mb-8 flex justify-between items-start">
+        <div className="space-y-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100">
+            Customer Support
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            We'd love to hear from you. Please share your concerns or issues below.
+          </p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors disabled:opacity-50 p-2"
+          title="Refresh page"
+        >
+          <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       {/* Success Message */}
