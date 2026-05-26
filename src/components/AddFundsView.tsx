@@ -116,9 +116,19 @@ export const AddFundsView = () => {
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-4xl space-y-10"
     >
-      <div>
-        <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Add Funds</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md">Deposit funds into your account to purchase services and boost your campaigns. All transactions are processed securely through Paystack.</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">Add Funds</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md">Deposit funds into your account to purchase services and boost your campaigns. All transactions are processed securely through Paystack.</p>
+        </div>
+        <button 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+          title="Refresh"
+        >
+          <RefreshCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       {/* Messages */}
