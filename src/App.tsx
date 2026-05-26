@@ -802,7 +802,7 @@ export default function App() {
             onPlaceOrder={placeOrder}
           />
         )}
-        {activeTab === 'AI Services' && (
+        {activeTab === 'AI Tools' && (
           <AIServicesPage onNavigate={(view) => setActiveTab(view === 'billing' ? 'Add Funds' : view)} />
         )}
         {activeTab === 'Boost Your Socials' && (

@@ -151,7 +151,7 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }: any) => {
         />
         <Option
           Icon={Cpu}
-          title="AI Services"
+          title="AI Tools"
           selected={activeTab}
           setSelected={setActiveTab}
           open={open}

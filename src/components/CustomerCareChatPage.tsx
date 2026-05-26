@@ -53,9 +53,34 @@ export const CustomerCareChatPage = () => {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    window.location.reload();
+  const handleRefresh = async () => {
+    if (!user?.email) return;
+    
+    try {
+      setIsRefreshing(true);
+      // Re-fetch the tickets
+      const ticketsCollection = collection(db, 'customer_care');
+      const q = query(ticketsCollection, where('email', '==', user.email), orderBy('createdAt', 'desc'));
+      
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const fetchedTickets = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name || '',
+          email: doc.data().email || '',
+          issue: doc.data().issue || '',
+          messages: doc.data().messages || [],
+          createdAt: doc.data().createdAt,
+          status: doc.data().status || 'pending'
+        }));
+        
+        setCustomerCareTickets(fetchedTickets);
+        unsubscribe();
+      });
+    } catch (err: any) {
+      console.error('Error refreshing tickets:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   // Helper function to check if ticket is recent (within last 24 hours)
