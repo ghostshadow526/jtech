@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, AlertCircle, Clock, MessageSquare } from 'lucide-react';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { X, CheckCircle, AlertCircle, Clock, MessageSquare, Loader } from 'lucide-react';
+import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 interface Complaint {
@@ -24,6 +24,7 @@ interface NotificationsPanelProps {
 export const NotificationsPanel = ({ isOpen, onClose, userEmail, onPendingCountChange }: NotificationsPanelProps) => {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userEmail) return;
@@ -59,6 +60,22 @@ export const NotificationsPanel = ({ isOpen, onClose, userEmail, onPendingCountC
 
     return () => unsubscribe();
   }, [userEmail, onPendingCountChange]);
+
+  const handleUpdateStatus = async (complaintId: string) => {
+    try {
+      setUpdatingId(complaintId);
+      const complaintRef = doc(db, 'complaints', complaintId);
+      await updateDoc(complaintRef, {
+        status: 'resolved',
+        resolvedAt: new Date()
+      });
+    } catch (error) {
+      console.error('Error updating complaint status:', error);
+      alert('Failed to update complaint status. Please try again.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -107,17 +124,36 @@ export const NotificationsPanel = ({ isOpen, onClose, userEmail, onPendingCountC
                   className="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   {/* Status Badge */}
-                  <div className="flex items-center gap-2 mb-3">
-                    {complaint.status === 'resolved' ? (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        <span className="text-xs font-semibold text-green-600 dark:text-green-400">Resolved</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
-                        <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">Pending</span>
-                      </>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {complaint.status === 'resolved' ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          <span className="text-xs font-semibold text-green-600 dark:text-green-400">Completed</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                          <span className="text-xs font-semibold text-yellow-600 dark:text-yellow-400">Pending</span>
+                        </>
+                      )}
+                    </div>
+                    
+                    {complaint.status === 'pending' && (
+                      <button
+                        onClick={() => handleUpdateStatus(complaint.id)}
+                        disabled={updatingId === complaint.id}
+                        className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-xs font-medium rounded transition-colors flex items-center gap-1"
+                      >
+                        {updatingId === complaint.id ? (
+                          <>
+                            <Loader className="h-3 w-3 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          'Mark Completed'
+                        )}
+                      </button>
                     )}
                   </div>
 
