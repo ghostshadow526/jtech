@@ -84,10 +84,10 @@ export const AddFundsView = () => {
             // Update user balance in Firestore
             const userRef = doc(db, 'users', auth.currentUser!.uid);
             await updateDoc(userRef, {
-              balance: increment(amount)
+              balance: increment(Number(amount))
             });
 
-            setSuccess(`Payment successful! ₦${amount.toLocaleString()} has been added to your account. Reference: ${response.reference}`);
+            setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} has been added to your account. Reference: ${response.reference || 'N/A'}`);
             setSelectedAmount(5000);
             setCustomAmount('');
             setLoading(false);
@@ -95,8 +95,8 @@ export const AddFundsView = () => {
             // Clear success message after 5 seconds
             setTimeout(() => setSuccess(null), 5000);
           } catch (err: any) {
-            console.error('Error updating balance:', err);
-            setError('Payment received but failed to update balance. Please contact support.');
+            console.error('Balance update failed. Amount:', amount, 'User UID:', auth.currentUser?.uid, 'Error:', err);
+            setError(`Payment received but failed to update balance. Please contact support with reference: ${response.reference || 'N/A'}`);
             setLoading(false);
           }
         }

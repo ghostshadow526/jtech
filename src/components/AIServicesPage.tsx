@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Cpu, Loader2, AlertCircle, ShoppingCart, RefreshCw } from 'lucide-react';
+import { Cpu, Loader2, AlertCircle, ShoppingCart, RefreshCw, CheckCircle } from 'lucide-react';
 import { collection, getDocs, query, doc, onSnapshot, updateDoc, increment } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAuth } from 'firebase/auth';
@@ -27,6 +27,7 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [selectedService, setSelectedService] = useState<AIService | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -96,16 +97,19 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
     try {
       const userDocRef = doc(db, 'users', user.uid);
       await updateDoc(userDocRef, {
-        balance: increment(-service.price),
+        balance: increment(-Number(service.price)),
       });
 
       const message = encodeURIComponent(
         `Hello, I have made payment for the ${service.name} AI tool.`
       );
       const whatsappUrl = `https://wa.me/2347013341935?text=${message}`;
-      window.location.href = whatsappUrl;
+
+      setSuccess(`Purchase successful! ₦${Number(service.price).toFixed(2)} has been deducted from your balance. Redirecting to WhatsApp...`);
+      window.open(whatsappUrl, '_blank');
 
       setError(null);
+      setTimeout(() => setSuccess(null), 5000);
     } catch (err: any) {
       setError(`Error processing purchase: ${err.message}`);
       console.error('Purchase error:', err);
@@ -188,6 +192,26 @@ export const AIServicesPage = ({ onNavigate }: AIServicesPageProps) => {
           <button
             onClick={() => setError(null)}
             className="ml-auto text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300"
+          >
+            ×
+          </button>
+        </motion.div>
+      )}
+
+      {/* Success Banner */}
+      {success && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/20 flex items-start gap-3"
+        >
+          <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-green-700 dark:text-green-300">{success}</p>
+          </div>
+          <button
+            onClick={() => setSuccess(null)}
+            className="ml-auto text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
           >
             ×
           </button>
