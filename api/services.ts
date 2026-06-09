@@ -5,7 +5,7 @@ const httpsAgent = new https.Agent({
   rejectUnauthorized: false,
 });
 
-const SMM_API_URL = "https://followersandviews.com/api/v2";
+const SMM_API_URL = process.env.SMM_API_URL || "https://followersandviews.com/api/v2";
 const SMM_API_KEY = process.env.SMM_API_KEY;
 
 export default async function handler(req: any, res: any) {
