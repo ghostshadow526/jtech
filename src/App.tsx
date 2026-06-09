@@ -155,7 +155,8 @@ export default function App() {
         }
       } catch (error: any) {
         console.error("Error fetching services", error);
-        setServicesError(error.message || "Failed to fetch services. Please check your connection.");
+        const errorMsg = error.response?.data?.error || error.message || "Failed to fetch services. Please check your connection.";
+        setServicesError(errorMsg);
       } finally {
         setServicesLoading(false);
       }
