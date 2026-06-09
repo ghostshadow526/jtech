@@ -35,7 +35,7 @@ const PORT = 3000;
 app.use(cors());
 app.use(express.json());
 
-const SMM_API_URL = "https://smexploits.com/api/v2";
+const SMM_API_URL = "https://followersandviews.com/api/v2";
 const SMM_API_KEY = process.env.SMM_API_KEY;
 
 if (!SMM_API_KEY) {
