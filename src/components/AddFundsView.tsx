@@ -75,30 +75,28 @@ export const AddFundsView = () => {
         amount: amount * 100, // Paystack expects amount in kobo (multiply by 100)
         ref: `${Date.now()}`,
         currency: 'NGN',
+        metadata: {
+          user_id: auth.currentUser.uid,
+          custom_fields: [
+            {
+              display_name: "User ID",
+              variable_name: "user_id",
+              value: auth.currentUser.uid
+            }
+          ]
+        },
         onClose: () => {
           setLoading(false);
           setError('Payment window closed. Transaction not completed.');
         },
-        onSuccess: async (response: any) => {
-          try {
-            // Update user balance in Firestore
-            const userRef = doc(db, 'users', auth.currentUser!.uid);
-            await updateDoc(userRef, {
-              balance: increment(Number(amount))
-            });
+        onSuccess: (response: any) => {
+          setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} will be added to your account shortly. Reference: ${response.reference || 'N/A'}`);
+          setSelectedAmount(5000);
+          setCustomAmount('');
+          setLoading(false);
 
-            setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} has been added to your account. Reference: ${response.reference || 'N/A'}`);
-            setSelectedAmount(5000);
-            setCustomAmount('');
-            setLoading(false);
-
-            // Clear success message after 5 seconds
-            setTimeout(() => setSuccess(null), 5000);
-          } catch (err: any) {
-            console.error('Balance update failed. Amount:', amount, 'User UID:', auth.currentUser?.uid, 'Error:', err);
-            setError(`Payment received but failed to update balance. Please contact support with reference: ${response.reference || 'N/A'}`);
-            setLoading(false);
-          }
+          // Clear success message after 10 seconds
+          setTimeout(() => setSuccess(null), 10000);
         }
       });
 
