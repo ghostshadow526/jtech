@@ -114,12 +114,13 @@ export default function App() {
         setBalance(snapshot.data().balance || 0);
       } else {
         // Initialize user if not exists
+        // Note: We don't initialize balance to 0 here to avoid overwriting
+        // updates that might have been processed by the webhook already.
         setDoc(doc(db, 'users', user.uid), {
           uid: user.uid,
           email: user.email,
-          balance: 0,
           createdAt: serverTimestamp()
-        }).catch(e => handleFirestoreError(e, OperationType.CREATE, `users/${user.uid}`));
+        }, { merge: true }).catch(e => handleFirestoreError(e, OperationType.CREATE, `users/${user.uid}`));
       }
     }, (error) => handleFirestoreError(error, OperationType.GET, `users/${user.uid}`));
     return () => unsubscribe();

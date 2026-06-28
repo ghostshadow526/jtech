@@ -96,11 +96,12 @@ export const AddFundsView = () => {
         },
         onSuccess: (response: any) => {
           paymentProcessed.current = true;
+          console.log('Paystack payment successful:', response);
           // We don't update balance here to prevent double-crediting.
           // The webhook handles the balance update securely.
           // The App.tsx balance listener will pick up the change automatically.
 
-          setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} will be added to your account shortly. Reference: ${response.reference || 'N/A'}`);
+          setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} will be added to your account shortly. Your balance updates automatically.`);
           setSelectedAmount(5000);
           setCustomAmount('');
           setLoading(false);

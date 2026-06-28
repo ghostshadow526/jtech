@@ -35,9 +35,9 @@ export default async function handler(req: any, res: any) {
   }
 
   // Verify signature
-  // Note: JSON.stringify(req.body) might be fragile if the body was already parsed and keys reordered.
-  // In a production Vercel environment, it's recommended to use the raw body.
   const hash = req.headers["x-paystack-signature"];
+  // Note: JSON.stringify might reorder keys if the body was already parsed.
+  // In production, obtaining the raw request body is the most reliable method for verification.
   const payload = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
   const expectedHash = crypto
     .createHmac("sha512", secret)
@@ -45,9 +45,8 @@ export default async function handler(req: any, res: any) {
     .digest("hex");
 
   if (hash !== expectedHash) {
-    console.error("Invalid Paystack signature. Received:", hash, "Expected:", expectedHash);
-    // In some environments, we might need to use the raw body.
-    // If this fails, we should check if req.body is already what we need.
+    console.error("Invalid Paystack signature detected.");
+    // For enhanced security, we must reject invalid signatures.
     return res.status(401).json({ error: "Invalid signature" });
   }
 
@@ -61,12 +60,12 @@ export default async function handler(req: any, res: any) {
     const metadata = data.metadata;
     const userIdFromMetadata = metadata?.user_id;
 
-    console.log(`Processing Paystack payment: ${reference}, amount: ${amount}, email: ${email}, userId: ${userIdFromMetadata}`);
+    console.log(`Processing Paystack payment: ${reference}, amount: ${amount}, email: ${email}`);
 
     try {
       let userId = userIdFromMetadata;
 
-      // If no userId in metadata, try finding by email as fallback
+      // If no userId in metadata, try finding by email
       if (!userId) {
         const usersSnapshot = await db
           .collection("users")
@@ -91,10 +90,13 @@ export default async function handler(req: any, res: any) {
             return;
           }
 
-          transaction.update(userRef, {
+          transaction.set(userRef, {
+            uid: userId,
+            email: email,
             balance: admin.firestore.FieldValue.increment(Number(amount)),
-            lastDeposit: admin.firestore.FieldValue.serverTimestamp()
-          });
+            lastDeposit: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          }, { merge: true });
 
           transaction.set(paymentRef, {
             userId,
