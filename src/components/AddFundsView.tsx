@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Wallet, CreditCard, ArrowRight, Loader2, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react';
-import { auth, db } from '../firebase';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { auth } from '../firebase';
 
 declare global {
   interface Window {
@@ -18,6 +17,9 @@ export const AddFundsView = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [paystackLoaded, setPaystackLoaded] = useState(false);
+
+  // Track if payment was successful to avoid "window closed" error after success
+  const paymentProcessed = useRef(false);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -67,6 +69,7 @@ export const AddFundsView = () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    paymentProcessed.current = false;
 
     try {
       const handler = window.PaystackPop.setup({
@@ -75,30 +78,32 @@ export const AddFundsView = () => {
         amount: amount * 100, // Paystack expects amount in kobo (multiply by 100)
         ref: `${Date.now()}`,
         currency: 'NGN',
+        metadata: {
+          user_id: auth.currentUser.uid,
+          custom_fields: [
+            {
+              display_name: "User ID",
+              variable_name: "user_id",
+              value: auth.currentUser.uid
+            }
+          ]
+        },
         onClose: () => {
           setLoading(false);
-          setError('Payment window closed. Transaction not completed.');
-        },
-        onSuccess: async (response: any) => {
-          try {
-            // Update user balance in Firestore
-            const userRef = doc(db, 'users', auth.currentUser!.uid);
-            await updateDoc(userRef, {
-              balance: increment(Number(amount))
-            });
-
-            setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} has been added to your account. Reference: ${response.reference || 'N/A'}`);
-            setSelectedAmount(5000);
-            setCustomAmount('');
-            setLoading(false);
-
-            // Clear success message after 5 seconds
-            setTimeout(() => setSuccess(null), 5000);
-          } catch (err: any) {
-            console.error('Balance update failed. Amount:', amount, 'User UID:', auth.currentUser?.uid, 'Error:', err);
-            setError(`Payment received but failed to update balance. Please contact support with reference: ${response.reference || 'N/A'}`);
-            setLoading(false);
+          if (!paymentProcessed.current) {
+            setError('Payment window closed. Transaction not completed.');
           }
+        },
+        onSuccess: (response: any) => {
+          paymentProcessed.current = true;
+          // We don't update balance here to prevent double-crediting.
+          // The webhook handles the balance update securely.
+          // The App.tsx balance listener will pick up the change automatically.
+
+          setSuccess(`Payment successful! ₦${Number(amount).toLocaleString()} will be added to your account shortly. Reference: ${response.reference || 'N/A'}`);
+          setSelectedAmount(5000);
+          setCustomAmount('');
+          setLoading(false);
         }
       });
 
@@ -114,7 +119,7 @@ export const AddFundsView = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-4xl space-y-10"
+      className="w-full max-w-4xl space-y-10 pb-20"
     >
       <div className="flex justify-between items-start">
         <div>
@@ -147,10 +152,19 @@ export const AddFundsView = () => {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 rounded-lg border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10 flex items-start gap-3"
+          className="p-6 rounded-xl border border-green-200 dark:border-green-900 bg-green-50 dark:bg-green-900/10 flex items-start gap-4 shadow-sm"
         >
-          <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-green-700 dark:text-green-300">{success}</p>
+          <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-bold text-green-800 dark:text-green-300 mb-1">Transaction Successful</h4>
+            <p className="text-sm text-green-700 dark:text-green-400 leading-relaxed">{success}</p>
+            <button
+              onClick={() => setSuccess(null)}
+              className="mt-3 text-xs font-bold text-green-600 dark:text-green-400 hover:underline"
+            >
+              Dismiss
+            </button>
+          </div>
         </motion.div>
       )}
 
